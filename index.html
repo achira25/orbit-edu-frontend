@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orbit-Edu — Live Space Tracker</title>
 
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    /* ─── RESET & ROOT ─────────────────────────────────── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --space:       #00000f;
+      --deep:        #040415;
+      --glass:       rgba(255,255,255,0.06);
+      --glass-b:     rgba(255,255,255,0.12);
+      --accent:      #4fc3f7;
+      --accent2:     #7c83fd;
+      --gold:        #ffd700;
+      --danger:      #ff6b6b;
+      --text:        #e8f4fd;
+      --muted:       rgba(232,244,253,0.5);
+      --font-display:'Orbitron', monospace;
+      --font-body:   'Exo 2', sans-serif;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
+
+    html, body {
+      width:100%; height:100%;
+      background: var(--space);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    /* ─── CANVAS ────────────────────────────────────────── */
+    #bg-canvas {
+      position: fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      z-index: 0;
+    }
+
+    /* ─── SCREENS ───────────────────────────────────────── */
+    .screen {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+    .screen.hidden { opacity:0; pointer-events:none; }
+
+    /* ─── INTRO SCREEN ──────────────────────────────────── */
+    #intro-screen {
+      background: transparent;
+      text-align: center;
+    }
+
+    .intro-logo {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 1.2s 0.5s forwards ease-out;
+      text-shadow: none;
+      filter: drop-shadow(0 0 40px rgba(79,195,247,0.4));
+    }
+
+    .intro-tagline {
+      margin-top: 1rem;
+      font-size: clamp(0.85rem, 2vw, 1.1rem);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeUp 1s 1s forwards ease-out;
+    }
+
+    .solar-label {
+      margin-top: 3rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.5em;
+      color: rgba(79,195,247,0.6);
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeUp 1s 1.5s forwards ease-out;
+    }
+
+    .enter-btn {
+      margin-top: 2.5rem;
+      padding: 0.9rem 3rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid rgba(79,195,247,0.4);
+      background: rgba(79,195,247,0.08);
+      color: var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0;
+      animation: fadeUp 1s 2s forwards ease-out;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px
