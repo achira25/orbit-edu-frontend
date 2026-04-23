@@ -160,6 +160,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%}
       <span class="ni" onclick="showP('passes',this)">ISS PASSES</span>
       <span class="ni" onclick="showP('explore',this)">EXPLORE</span>
     </div>
+    <button class="ni" style="background:rgba(255,200,87,.1);border:1px solid var(--g);color:var(--g)" onclick="openAcademy()">&#127891; MISSION ACADEMY</button>
     <div id="uc">UTC 00:00:00</div>
   </nav>
 
@@ -823,5 +824,630 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
 
 window.addEventListener('DOMContentLoaded',initSolar);
 </script>
+  
+<!-- GAME HUB POPUP -->
+<div id="academy" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,3,15,.97);backdrop-filter:blur(30px);overflow-y:auto">
+ 
+  <!-- HEADER -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;border-bottom:1px solid rgba(0,200,255,.18)">
+    <div>
+      <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;color:#00d4ff;letter-spacing:.12em">&#127891; MISSION ACADEMY</div>
+      <div style="font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:.28em;color:rgba(180,220,240,.45);margin-top:.2rem">LEARN SPACE THROUGH PLAY</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1.2rem">
+      <div style="font-family:'Orbitron',monospace;font-size:.55rem;color:#ffc857;letter-spacing:.1em">XP: <span id="total-xp">0</span> &nbsp;|&nbsp; RANK: <span id="rank-txt">CADET</span></div>
+      <button onclick="closeAcademy()" style="font-family:'Orbitron',monospace;font-size:.55rem;padding:.38rem .8rem;border:1px solid rgba(0,200,255,.3);background:transparent;color:rgba(180,220,240,.6);cursor:pointer;letter-spacing:.15em;transition:all .2s" onmouseover="this.style.color='#00d4ff';this.style.borderColor='#00d4ff'" onmouseout="this.style.color='rgba(180,220,240,.6)';this.style.borderColor='rgba(0,200,255,.3)'">&#10005; CLOSE</button>
+    </div>
+  </div>
+ 
+  <!-- GAME SELECT SCREEN -->
+  <div id="ac-home">
+    <div style="text-align:center;padding:2rem 1rem .5rem;font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:.3em;color:rgba(180,220,240,.5)">SELECT YOUR MISSION</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;padding:1.2rem 2rem 2rem;max-width:920px;margin:0 auto">
+ 
+      <!-- QUIZ CARD -->
+      <div onclick="startGame('quiz')" style="background:rgba(0,212,255,.05);border:1px solid rgba(0,200,255,.2);padding:1.6rem;cursor:pointer;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));transition:all .3s" onmouseover="this.style.background='rgba(0,212,255,.1)';this.style.borderColor='#00d4ff'" onmouseout="this.style.background='rgba(0,212,255,.05)';this.style.borderColor='rgba(0,200,255,.2)'">
+        <div style="font-size:2.5rem;margin-bottom:.8rem">&#10067;</div>
+        <div style="font-family:'Orbitron',monospace;font-size:.72rem;color:#00d4ff;letter-spacing:.12em;margin-bottom:.4rem">SPACE QUIZ</div>
+        <div style="font-size:.8rem;color:rgba(180,220,240,.6);line-height:1.6;margin-bottom:.8rem">3 difficulty levels · 30 questions · Wrong answers teach you the right fact · Earn XP badges</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(0,212,255,.3);color:#00d4ff">CADET</span>
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(255,200,87,.3);color:#ffc857">ASTRONAUT</span>
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(255,71,87,.3);color:#ff4757">COMMANDER</span>
+        </div>
+        <div style="margin-top:.8rem;font-family:'Orbitron',monospace;font-size:.48rem;color:rgba(180,220,240,.4)">BEST: <span id="quiz-best">—</span> &nbsp; XP REWARD: 50–150</div>
+      </div>
+ 
+      <!-- PLANET BUILDER CARD -->
+      <div onclick="startGame('builder')" style="background:rgba(255,200,87,.04);border:1px solid rgba(255,200,87,.2);padding:1.6rem;cursor:pointer;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));transition:all .3s" onmouseover="this.style.background='rgba(255,200,87,.1)';this.style.borderColor='#ffc857'" onmouseout="this.style.background='rgba(255,200,87,.04)';this.style.borderColor='rgba(255,200,87,.2)'">
+        <div style="font-size:2.5rem;margin-bottom:.8rem">&#127758;</div>
+        <div style="font-family:'Orbitron',monospace;font-size:.72rem;color:#ffc857;letter-spacing:.12em;margin-bottom:.4rem">PLANET BUILDER</div>
+        <div style="font-size:.8rem;color:rgba(180,220,240,.6);line-height:1.6;margin-bottom:.8rem">Drag planets into the correct orbit order · Learn distances from Sun · Beat the timer for bonus XP</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(255,200,87,.3);color:#ffc857">ORDER CHALLENGE</span>
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(46,213,115,.3);color:#2ed573">FACT CARDS</span>
+        </div>
+        <div style="margin-top:.8rem;font-family:'Orbitron',monospace;font-size:.48rem;color:rgba(180,220,240,.4)">BEST: <span id="builder-best">—</span> &nbsp; XP REWARD: 75–200</div>
+      </div>
+ 
+      <!-- ASTEROID DODGE CARD -->
+      <div onclick="startGame('dodge')" style="background:rgba(255,71,87,.04);border:1px solid rgba(255,71,87,.2);padding:1.6rem;cursor:pointer;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));transition:all .3s" onmouseover="this.style.background='rgba(255,71,87,.1)';this.style.borderColor='#ff4757'" onmouseout="this.style.background='rgba(255,71,87,.04)';this.style.borderColor='rgba(255,71,87,.2)'">
+        <div style="font-size:2.5rem;margin-bottom:.8rem">&#128640;</div>
+        <div style="font-family:'Orbitron',monospace;font-size:.72rem;color:#ff4757;letter-spacing:.12em;margin-bottom:.4rem">ASTEROID DODGE</div>
+        <div style="font-size:.8rem;color:rgba(180,220,240,.6);line-height:1.6;margin-bottom:.8rem">Pilot the ISS · Dodge asteroids · Space facts appear mid-game · Survive as long as possible</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(255,71,87,.3);color:#ff4757">ARCADE</span>
+          <span style="font-family:'Orbitron',monospace;font-size:.42rem;padding:.18rem .5rem;border:1px solid rgba(0,212,255,.3);color:#00d4ff">LIVE FACTS</span>
+        </div>
+        <div style="margin-top:.8rem;font-family:'Orbitron',monospace;font-size:.48rem;color:rgba(180,220,240,.4)">BEST: <span id="dodge-best">—</span>s &nbsp; XP REWARD: 10/sec</div>
+      </div>
+ 
+    </div>
+ 
+    <!-- XP BAR -->
+    <div style="max-width:600px;margin:0 auto;padding:0 2rem 2rem">
+      <div style="display:flex;justify-content:space-between;font-family:'Orbitron',monospace;font-size:.48rem;color:rgba(180,220,240,.45);margin-bottom:.4rem">
+        <span>PROGRESS TO NEXT RANK</span><span id="xp-label">0 / 100 XP</span>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+        <div id="xp-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#00d4ff,#ffc857);transition:width .5s ease;border-radius:2px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin-top:1.2rem;flex-wrap:wrap;gap:.5rem" id="badge-row"></div>
+    </div>
+  </div>
+ 
+  <!-- QUIZ GAME -->
+  <div id="ac-quiz" style="display:none;max-width:700px;margin:0 auto;padding:1.5rem 2rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem">
+      <button onclick="backToHome()" style="font-family:'Orbitron',monospace;font-size:.5rem;padding:.35rem .7rem;border:1px solid rgba(0,200,255,.25);background:transparent;color:rgba(180,220,240,.5);cursor:pointer;letter-spacing:.1em">&#8592; BACK</button>
+      <div style="display:flex;gap:1rem;font-family:'Orbitron',monospace;font-size:.55rem">
+        <span style="color:#00d4ff">Q <span id="q-num">1</span>/10</span>
+        <span style="color:#ffc857">SCORE: <span id="q-score">0</span></span>
+        <span style="color:#2ed573">STREAK: <span id="q-streak">0</span>&#9889;</span>
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <button onclick="setDiff('easy')" id="diff-easy" style="font-family:'Orbitron',monospace;font-size:.45rem;padding:.28rem .55rem;border:1px solid #00d4ff;background:rgba(0,212,255,.1);color:#00d4ff;cursor:pointer">CADET</button>
+        <button onclick="setDiff('med')" id="diff-med" style="font-family:'Orbitron',monospace;font-size:.45rem;padding:.28rem .55rem;border:1px solid rgba(255,200,87,.3);background:transparent;color:rgba(255,200,87,.5);cursor:pointer">ASTRONAUT</button>
+        <button onclick="setDiff('hard')" id="diff-hard" style="font-family:'Orbitron',monospace;font-size:.45rem;padding:.28rem .55rem;border:1px solid rgba(255,71,87,.3);background:transparent;color:rgba(255,71,87,.5);cursor:pointer">COMMANDER</button>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div style="height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-bottom:1.5rem;overflow:hidden">
+      <div id="q-progress" style="height:100%;width:10%;background:#00d4ff;transition:width .4s ease;border-radius:2px"></div>
+    </div>
+    <!-- Category badge -->
+    <div id="q-category" style="font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:.2em;color:#ffc857;margin-bottom:.6rem"></div>
+    <!-- Question -->
+    <div id="q-text" style="font-size:1.05rem;color:#cce8f4;line-height:1.7;margin-bottom:1.4rem;min-height:60px"></div>
+    <!-- Options -->
+    <div id="q-opts" style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem"></div>
+    <!-- Feedback -->
+    <div id="q-feedback" style="display:none;padding:.8rem 1rem;border-left:3px solid #2ed573;background:rgba(46,213,115,.06);font-size:.8rem;color:#cce8f4;line-height:1.7;margin-bottom:.8rem"></div>
+    <!-- Next -->
+    <button id="q-next" onclick="nextQuestion()" style="display:none;font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.18em;padding:.65rem 1.5rem;border:1px solid #00d4ff;background:rgba(0,212,255,.08);color:#00d4ff;cursor:pointer;float:right">NEXT QUESTION &#9658;</button>
+    <div style="clear:both"></div>
+  </div>
+ 
+  <!-- PLANET BUILDER GAME -->
+  <div id="ac-builder" style="display:none;max-width:860px;margin:0 auto;padding:1.5rem 2rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+      <button onclick="backToHome()" style="font-family:'Orbitron',monospace;font-size:.5rem;padding:.35rem .7rem;border:1px solid rgba(0,200,255,.25);background:transparent;color:rgba(180,220,240,.5);cursor:pointer;letter-spacing:.1em">&#8592; BACK</button>
+      <div style="font-family:'Orbitron',monospace;font-size:.58rem;color:#ffc857">TIME: <span id="bl-timer">60</span>s &nbsp;|&nbsp; SCORE: <span id="bl-score">0</span>/8</div>
+      <button onclick="resetBuilder()" style="font-family:'Orbitron',monospace;font-size:.5rem;padding:.35rem .7rem;border:1px solid rgba(255,200,87,.3);background:rgba(255,200,87,.06);color:#ffc857;cursor:pointer">&#8635; RESTART</button>
+    </div>
+    <div style="font-family:'Orbitron',monospace;font-size:.52rem;letter-spacing:.2em;color:rgba(180,220,240,.45);text-align:center;margin-bottom:1rem">DRAG PLANETS INTO THE CORRECT ORBIT SLOTS (CLOSEST TO FARTHEST FROM SUN)</div>
+ 
+    <!-- Orbit slots -->
+    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:1.4rem;flex-wrap:wrap;justify-content:center" id="bl-slots"></div>
+ 
+    <!-- Planet tray -->
+    <div style="border-top:1px solid rgba(0,200,255,.12);padding-top:1rem;margin-bottom:1rem">
+      <div style="font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:.2em;color:rgba(180,220,240,.4);margin-bottom:.7rem">PLANET TRAY — DRAG TO SLOTS ABOVE</div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center" id="bl-tray"></div>
+    </div>
+ 
+    <!-- Fact card -->
+    <div id="bl-fact" style="display:none;background:rgba(255,200,87,.05);border:1px solid rgba(255,200,87,.2);border-left:3px solid #ffc857;padding:.7rem 1rem;font-size:.76rem;color:#cce8f4;line-height:1.65;margin-top:.5rem"></div>
+  </div>
+ 
+  <!-- ASTEROID DODGE GAME -->
+  <div id="ac-dodge" style="display:none;padding:1rem 2rem;text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;max-width:600px;margin-left:auto;margin-right:auto;flex-wrap:wrap;gap:.5rem">
+      <button onclick="backToHome()" style="font-family:'Orbitron',monospace;font-size:.5rem;padding:.35rem .7rem;border:1px solid rgba(0,200,255,.25);background:transparent;color:rgba(180,220,240,.5);cursor:pointer;letter-spacing:.1em">&#8592; BACK</button>
+      <div style="font-family:'Orbitron',monospace;font-size:.58rem">
+        <span style="color:#ff4757">&#10084; <span id="dg-lives">3</span></span> &nbsp;
+        <span style="color:#ffc857">TIME: <span id="dg-time">0</span>s</span> &nbsp;
+        <span style="color:#00d4ff">BEST: <span id="dg-best-show">0</span>s</span>
+      </div>
+      <button onclick="startDodge()" style="font-family:'Orbitron',monospace;font-size:.5rem;padding:.35rem .7rem;border:1px solid rgba(255,71,87,.3);background:rgba(255,71,87,.06);color:#ff4757;cursor:pointer">&#9654; RESTART</button>
+    </div>
+    <div style="position:relative;display:inline-block">
+      <canvas id="dg-canvas" width="580" height="400" style="border:1px solid rgba(0,200,255,.2);background:#00000f;display:block;margin:0 auto"></canvas>
+      <!-- Overlay for start/gameover -->
+      <div id="dg-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,3,15,.88)">
+        <div style="font-family:'Orbitron',monospace;font-size:1rem;color:#ff4757;margin-bottom:.5rem" id="dg-ov-title">ASTEROID DODGE</div>
+        <div style="font-size:.8rem;color:rgba(180,220,240,.6);margin-bottom:1.2rem;line-height:1.6" id="dg-ov-sub">Dodge asteroids · Collect facts · Survive as long as possible<br>Use ARROW KEYS or WASD or tap the canvas sides to move</div>
+        <button onclick="startDodge()" style="font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:.2em;padding:.75rem 2rem;border:1px solid #ff4757;background:rgba(255,71,87,.1);color:#ff4757;cursor:pointer">LAUNCH MISSION &#128640;</button>
+      </div>
+    </div>
+    <!-- Fact banner -->
+    <div id="dg-fact" style="max-width:580px;margin:.7rem auto 0;display:none;background:rgba(0,212,255,.06);border:1px solid rgba(0,200,255,.2);border-left:3px solid #00d4ff;padding:.6rem .9rem;font-size:.75rem;color:#cce8f4;line-height:1.6;text-align:left"></div>
+  </div>
+ 
+</div>
+ 
+<style>
+.q-opt{width:100%;padding:.7rem .9rem;font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.08em;border:1px solid rgba(0,200,255,.2);background:rgba(0,212,255,.04);color:#cce8f4;cursor:pointer;transition:all .25s;text-align:left;line-height:1.5;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%)}
+.q-opt:hover{background:rgba(0,212,255,.12);border-color:#00d4ff}
+.q-opt.correct{background:rgba(46,213,115,.15);border-color:#2ed573;color:#2ed573}
+.q-opt.wrong{background:rgba(255,71,87,.12);border-color:#ff4757;color:#ff4757}
+.q-opt:disabled{cursor:default}
+.bl-slot{width:72px;height:72px;border:1px dashed rgba(0,200,255,.25);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:.4rem;color:rgba(180,220,240,.35);letter-spacing:.08em;transition:all .25s;background:rgba(0,212,255,.02)}
+.bl-slot.drag-over{border-color:#00d4ff;background:rgba(0,212,255,.1)}
+.bl-slot.correct{border-color:#2ed573;background:rgba(46,213,115,.08)}
+.bl-slot.wrong{border-color:#ff4757;background:rgba(255,71,87,.08);animation:shake .3s ease}
+.bl-planet{padding:.5rem .7rem;border:1px solid rgba(255,200,87,.3);background:rgba(255,200,87,.06);cursor:grab;font-family:'Orbitron',monospace;font-size:.48rem;color:#ffc857;letter-spacing:.08em;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.2rem;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
+.bl-planet:hover{background:rgba(255,200,87,.14);border-color:#ffc857}
+.bl-planet:active{cursor:grabbing}
+.badge{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .6rem;border:1px solid rgba(0,200,255,.18);background:rgba(0,212,255,.04);clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
+.badge .b-icon{font-size:1.1rem}
+.badge .b-name{font-family:'Orbitron',monospace;font-size:.38rem;color:rgba(180,220,240,.5);letter-spacing:.1em}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .3s ease forwards}
+</style>
+ 
+<script>
+/* ═══════════ ACADEMY CORE ═══════════ */
+let totalXP=parseInt(localStorage.getItem('oedu-xp')||0);
+let badges=JSON.parse(localStorage.getItem('oedu-badges')||'[]');
+const RANKS=[{n:'CADET',x:0},{n:'PILOT',x:100},{n:'ASTRONAUT',x:300},{n:'COMMANDER',x:600},{n:'ADMIRAL',x:1000},{n:'LEGEND',x:2000}];
+ 
+function openAcademy(){
+  document.getElementById('academy').style.display='block';
+  backToHome();updateXPDisplay();
+}
+function closeAcademy(){document.getElementById('academy').style.display='none';}
+function backToHome(){
+  ['ac-quiz','ac-builder','ac-dodge'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('ac-home').style.display='block';
+  stopDodge();updateXPDisplay();
+}
+ 
+function addXP(amt){
+  totalXP+=amt;
+  localStorage.setItem('oedu-xp',totalXP);
+  updateXPDisplay();
+  // Floating XP notification
+  const el=document.createElement('div');
+  el.textContent='+'+amt+' XP';
+  el.style.cssText='position:fixed;top:80px;right:2rem;font-family:Orbitron,monospace;font-size:.8rem;color:#ffc857;z-index:200;animation:pop .3s ease forwards;pointer-events:none';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
+}
+ 
+function updateXPDisplay(){
+  document.getElementById('total-xp').textContent=totalXP;
+  const rank=RANKS.filter(r=>totalXP>=r.x).pop();
+  const nextRank=RANKS.find(r=>r.x>totalXP);
+  document.getElementById('rank-txt').textContent=rank.n;
+  const pct=nextRank?Math.min(100,((totalXP-rank.x)/(nextRank.x-rank.x))*100):100;
+  document.getElementById('xp-bar').style.width=pct+'%';
+  document.getElementById('xp-label').textContent=totalXP+' / '+(nextRank?nextRank.x:'MAX')+' XP';
+  renderBadges();
+}
+ 
+function earnBadge(id,icon,name){
+  if(!badges.includes(id)){
+    badges.push(id);localStorage.setItem('oedu-badges',JSON.stringify(badges));renderBadges();
+    const el=document.createElement('div');
+    el.innerHTML='<span style="font-size:1.4rem">'+icon+'</span><br><span style="font-family:Orbitron,monospace;font-size:.5rem;color:#ffc857">BADGE: '+name+'</span>';
+    el.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(4,10,28,.95);border:1px solid #ffc857;padding:.8rem 1.5rem;text-align:center;z-index:200;animation:pop .3s ease forwards';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),3000);
+  }
+}
+ 
+function renderBadges(){
+  const BADGE_DATA={first_quiz:{icon:'🎯',name:'FIRST QUIZ'},perfect_quiz:{icon:'⭐',name:'PERFECT'},streak5:{icon:'⚡',name:'STREAK 5'},builder_win:{icon:'🪐',name:'BUILDER'},dodge30:{icon:'🚀',name:'SURVIVOR'},xp100:{icon:'🏆',name:'100 XP'},xp500:{icon:'💎',name:'500 XP'}};
+  const el=document.getElementById('badge-row');
+  if(!el)return;
+  el.innerHTML=badges.map(b=>BADGE_DATA[b]?`<div class="badge pop"><div class="b-icon">${BADGE_DATA[b].icon}</div><div class="b-name">${BADGE_DATA[b].name}</div></div>`:'').join('');
+  if(!badges.length)el.innerHTML='<div style="font-family:Orbitron,monospace;font-size:.48rem;color:rgba(180,220,240,.3);letter-spacing:.2em">EARN BADGES BY PLAYING</div>';
+}
+ 
+function startGame(which){
+  document.getElementById('ac-home').style.display='none';
+  if(which==='quiz'){document.getElementById('ac-quiz').style.display='block';initQuiz();}
+  else if(which==='builder'){document.getElementById('ac-builder').style.display='block';initBuilder();}
+  else if(which==='dodge'){document.getElementById('ac-dodge').style.display='block';}
+}
+ 
+/* ═══════════ QUIZ GAME ═══════════ */
+const QUIZ_Q={
+  easy:[
+    {q:'Which is the largest planet in our solar system?',opts:['Jupiter','Saturn','Neptune','Uranus'],a:0,fact:'Jupiter is so massive that all other planets could fit inside it with room to spare. Its Great Red Spot is a storm that has lasted over 400 years.',cat:'PLANETS'},
+    {q:'How long does light from the Sun take to reach Earth?',opts:['8 seconds','8 minutes','8 hours','8 days'],a:1,fact:'Light travels at 300,000 km/s. The Sun is 150 million km away — so its light takes exactly 8 minutes 20 seconds to reach us.',cat:'THE SUN'},
+    {q:'What is the ISS?',opts:['A NASA telescope','A space station in orbit','A Mars rover','A rocket'],a:1,fact:'The International Space Station orbits Earth at ~408 km altitude, completing 15.5 orbits per day at 27,600 km/h.',cat:'ISS'},
+    {q:'Which planet has the most moons?',opts:['Jupiter','Saturn','Uranus','Neptune'],a:1,fact:'Saturn has 146 confirmed moons — the most of any planet! Jupiter has 95. Titan (Saturn\'s largest moon) is bigger than the planet Mercury.',cat:'PLANETS'},
+    {q:'What is a light-year?',opts:['Time it takes light to reach the Moon','Distance light travels in one year','Speed of light','Age of the universe'],a:1,fact:'A light-year is the distance light travels in one year — about 9.46 trillion km. The nearest star is 4.24 light-years away.',cat:'UNIVERSE'},
+    {q:'What percentage of the solar system\'s mass does the Sun contain?',opts:['50%','75%','99.86%','60%'],a:2,fact:'The Sun contains 99.86% of all mass in the solar system. All the planets, asteroids, and comets combined make up just 0.14%.',cat:'THE SUN'},
+    {q:'How many humans have walked on the Moon?',opts:['6','12','18','3'],a:1,fact:'12 astronauts walked on the Moon during the Apollo program (1969–1972). Neil Armstrong and Buzz Aldrin were first, on Apollo 11.',cat:'HISTORY'},
+    {q:'What causes the Northern Lights (Aurora Borealis)?',opts:['Reflection from ice','Solar particles hitting Earth\'s magnetic field','Moonlight','Volcanic activity'],a:1,fact:'Solar wind particles are funneled toward Earth\'s poles by the magnetic field. They collide with atmospheric gases, causing them to glow — green from oxygen, red from nitrogen.',cat:'EARTH'},
+    {q:'What is the name of the first artificial satellite launched into space?',opts:['Explorer 1','Vostok','Sputnik 1','Luna 1'],a:2,fact:'Sputnik 1 was launched by the Soviet Union on October 4, 1957. It was a 58 cm sphere that beeped as it orbited. The Space Age had begun.',cat:'HISTORY'},
+    {q:'How far is the Moon from Earth?',opts:['38,440 km','384,400 km','3,844,000 km','38,440,000 km'],a:1,fact:'The Moon averages 384,400 km from Earth. This distance is slowly increasing — the Moon drifts away at 3.8 cm per year.',cat:'THE MOON'},
+  ],
+  med:[
+    {q:'What is the Karman Line?',opts:['The edge of the Solar System','The boundary between atmosphere and space at 100km','The orbit of the ISS','Earth\'s magnetic field boundary'],a:1,fact:'The Kármán Line at 100 km altitude is the internationally recognised boundary between Earth\'s atmosphere and outer space. Above it, aerodynamic lift becomes impossible.',cat:'SPACE SCIENCE'},
+    {q:'What does NASA stand for?',opts:['National Aeronautics and Space Administration','North American Space Agency','National Astronomy and Science Association','New Aerospace and Satellite Authority'],a:0,fact:'NASA was established on July 29, 1958 by President Eisenhower. It was created in response to the Soviet Union\'s Sputnik launch. Its budget is ~$25 billion per year.',cat:'HISTORY'},
+    {q:'Which spacecraft first left our solar system?',opts:['Apollo 13','Voyager 1','Pioneer 10','New Horizons'],a:1,fact:'Voyager 1 entered interstellar space in 2012 — 35 years after launch. It\'s now over 23 billion km from Earth and still transmitting data.',cat:'EXPLORATION'},
+    {q:'What is a neutron star?',opts:['A star forming stage','Collapsed remnant of a supernova, incredibly dense','A star with no magnetic field','A type of black hole'],a:1,fact:'A neutron star is so dense that a teaspoon of its material would weigh ~1 billion tonnes. They spin up to 700 times per second. Their diameter is only ~20 km.',cat:'STARS'},
+    {q:'What percentage of the universe is ordinary matter?',opts:['100%','50%','27%','5%'],a:3,fact:'Only 5% of the universe is ordinary matter. 27% is dark matter (invisible but has gravity) and 68% is dark energy (causing accelerating expansion). We don\'t know what either actually is.',cat:'UNIVERSE'},
+    {q:'How hot is the Sun\'s core?',opts:['5,500°C','550,000°C','15 million°C','1 billion°C'],a:2,fact:'The Sun\'s core reaches 15 million°C — hot enough to force hydrogen nuclei together in nuclear fusion. The surface is a much cooler 5,500°C.',cat:'THE SUN'},
+    {q:'What is the Oort Cloud?',opts:['A gas cloud near Jupiter','A spherical shell of icy objects at the solar system\'s edge','Clouds on Saturn','The asteroid belt'],a:1,fact:'The Oort Cloud is a vast spherical shell of icy bodies surrounding the solar system at up to 100,000 AU from the Sun. It\'s the source of long-period comets.',cat:'SOLAR SYSTEM'},
+    {q:'On what planet does the largest volcano in the solar system exist?',opts:['Venus','Earth','Mars','Jupiter\'s moon Io'],a:2,fact:'Olympus Mons on Mars is 22 km tall — nearly 3× Everest — and 600 km wide. It\'s a shield volcano that grew so large because Mars has no tectonic plates to move it away.',cat:'PLANETS'},
+    {q:'What is the Chandrasekhar Limit?',opts:['Max temperature of a star','Max mass of a white dwarf (~1.4 solar masses)','Speed needed to escape Earth','Distance to nearest galaxy'],a:1,fact:'Stars below 1.4 solar masses end as white dwarfs. Above this limit (discovered by Subrahmanyan Chandrasekhar in 1930), electron pressure can\'t support the star — it collapses further into a neutron star or black hole.',cat:'STARS'},
+    {q:'What was the first animal in space?',opts:['A chimpanzee named Ham','A dog named Laika','A monkey named Albert','A cat named Félicette'],a:1,fact:'Laika (meaning "barker" in Russian) was a stray dog launched on Sputnik 2 on November 3, 1957. Sadly, the mission had no return plan. She is honoured with monuments in Russia.',cat:'HISTORY'},
+  ],
+  hard:[
+    {q:'What is the Schwarzschild radius?',opts:['Orbit of a neutron star','Radius at which an object becomes a black hole','Size of a quasar','Distance to event horizon from infinity'],a:1,fact:'The Schwarzschild radius defines the event horizon of a non-rotating black hole. For Earth, it\'s ~9mm. For the Sun, ~3km. Below this radius, not even light can escape.',cat:'PHYSICS'},
+    {q:'What is the Hubble constant (approximate)?',opts:['3.8 cm/year','70 km/s/Mpc','186,000 miles/sec','9.8 m/s²'],a:1,fact:'The Hubble constant (H₀ ≈ 70 km/s/Mpc) describes how fast the universe expands — for every megaparsec of distance, galaxies recede ~70 km/s faster. Its precise value is still debated ("Hubble tension").',cat:'COSMOLOGY'},
+    {q:'What is the CNO cycle?',opts:['A method of classifying stars','Stellar fusion using carbon, nitrogen and oxygen as catalysts','A type of nebula','A NASA mission'],a:1,fact:'In stars more massive than the Sun, the CNO cycle is the dominant fusion process. Carbon, nitrogen, and oxygen act as catalysts to fuse hydrogen into helium, releasing enormous energy.',cat:'ASTROPHYSICS'},
+    {q:'What causes a gamma-ray burst (GRB)?',opts:['Solar flares','Merging neutron stars or core collapse supernovae','Asteroid impacts','Black hole evaporation'],a:1,fact:'GRBs are the most energetic explosions in the universe. Long GRBs come from collapsing massive stars; short GRBs from merging neutron stars. A GRB pointed at Earth from 1,000 light-years could strip our ozone layer.',cat:'EXTREME PHYSICS'},
+    {q:'What is frame dragging (Lense-Thirring effect)?',opts:['Bending of light near massive objects','Rotation of massive objects warping spacetime around them','Time dilation near black holes','Gravitational waves'],a:1,fact:'A spinning massive object drags spacetime around it like a whirlpool. Gravity Probe B (2004–2005) confirmed this to 0.3% accuracy. Frame dragging affects GPS satellites and pulsar timings.',cat:'RELATIVITY'},
+    {q:'What is the temperature of the cosmic microwave background (CMB)?',opts:['0 Kelvin','2.725 Kelvin','100 Kelvin','3000 Kelvin'],a:1,fact:'The CMB is the afterglow of the Big Bang — light released 380,000 years after the Big Bang when the universe cooled enough for atoms to form. It now fills all of space at 2.725 K.',cat:'COSMOLOGY'},
+    {q:'What is the Roche limit?',opts:['The edge of a galaxy','The distance within which tidal forces break apart a satellite','Maximum orbit for a moon','The boundary of a star\'s gravity'],a:1,fact:'The Roche limit is the orbital distance below which a celestial body (held together only by gravity) will disintegrate due to tidal forces. Saturn\'s rings may be remnants of a moon that crossed this limit.',cat:'ORBITAL MECHANICS'},
+    {q:'What proved the existence of gravitational waves?',opts:['Hubble Telescope','LIGO detecting two merging black holes in 2015','Radio telescope observations','Voyager data'],a:1,fact:'LIGO detected gravitational waves on September 14, 2015 — from two black holes 1.3 billion light-years away merging. The waves caused a distortion of 1/1000th the diameter of a proton. Einstein predicted this in 1916.',cat:'PHYSICS'},
+    {q:'What is Hawking radiation?',opts:['Radiation from the Sun','Theoretical radiation from black holes due to quantum effects','Cosmic ray showers','Radiation from neutron stars'],a:1,fact:'Stephen Hawking theorised in 1974 that black holes emit thermal radiation due to quantum fluctuations near the event horizon. Over enormous timescales, this causes black holes to slowly evaporate. No direct observation yet.',cat:'QUANTUM GRAVITY'},
+    {q:'What is the Drake Equation used for?',opts:['Calculating rocket trajectories','Estimating number of communicating civilisations in the galaxy','Measuring star distances','Predicting asteroid orbits'],a:1,fact:'Formulated by Frank Drake in 1961, the equation estimates N = R* × fp × ne × fl × fi × fc × L. Estimates range from 0 (Fermi paradox — where is everyone?) to millions. The biggest unknown is L, the civilisation lifetime.',cat:'ASTROBIOLOGY'},
+  ]
+};
+ 
+let qCurrent=0,qScore=0,qStreak=0,qDiff='easy',qQuestions=[],qAnswered=false;
+ 
+function initQuiz(){
+  qCurrent=0;qScore=0;qStreak=0;
+  document.getElementById('q-score').textContent=0;
+  document.getElementById('q-streak').textContent=0;
+  shuffleQuiz();renderQuestion();
+}
+ 
+function setDiff(d){
+  qDiff=d;
+  ['easy','med','hard'].forEach(x=>{
+    const el=document.getElementById('diff-'+x);
+    el.style.background='transparent';el.style.borderColor='rgba(0,200,255,.2)';el.style.color='rgba(180,220,240,.4)';
+  });
+  const colors={easy:'#00d4ff',med:'#ffc857',hard:'#ff4757'};
+  const el=document.getElementById('diff-'+d);
+  el.style.background='rgba(0,0,0,.2)';el.style.borderColor=colors[d];el.style.color=colors[d];
+  qCurrent=0;qScore=0;qStreak=0;
+  document.getElementById('q-score').textContent=0;
+  document.getElementById('q-streak').textContent=0;
+  shuffleQuiz();renderQuestion();
+}
+ 
+function shuffleQuiz(){
+  const pool=[...QUIZ_Q[qDiff]];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  qQuestions=pool.slice(0,10);
+}
+ 
+function renderQuestion(){
+  if(qCurrent>=qQuestions.length){endQuiz();return;}
+  qAnswered=false;
+  const q=qQuestions[qCurrent];
+  document.getElementById('q-num').textContent=qCurrent+1;
+  document.getElementById('q-progress').style.width=((qCurrent+1)/10*100)+'%';
+  document.getElementById('q-category').textContent='📡 '+q.cat;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-feedback').style.display='none';
+  document.getElementById('q-next').style.display='none';
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML=q.opts.map((o,i)=>`<button class="q-opt" onclick="answerQ(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('');
+}
+ 
+function answerQ(i){
+  if(qAnswered)return;
+  qAnswered=true;
+  const q=qQuestions[qCurrent];
+  const btns=document.querySelectorAll('.q-opt');
+  btns.forEach(b=>b.disabled=true);
+  if(i===q.a){
+    btns[i].classList.add('correct');
+    qScore++;qStreak++;
+    document.getElementById('q-score').textContent=qScore;
+    document.getElementById('q-streak').textContent=qStreak;
+    const fb=document.getElementById('q-feedback');
+    fb.style.borderColor='#2ed573';fb.style.background='rgba(46,213,115,.06)';
+    fb.innerHTML='<strong style="color:#2ed573;font-family:Orbitron,monospace;font-size:.52rem">✓ CORRECT!</strong><br>'+q.fact;
+    fb.style.display='block';
+    if(qStreak>=5)earnBadge('streak5','⚡','STREAK 5');
+  }else{
+    btns[i].classList.add('wrong');
+    btns[q.a].classList.add('correct');
+    qStreak=0;
+    document.getElementById('q-streak').textContent=0;
+    const fb=document.getElementById('q-feedback');
+    fb.style.borderColor='#ff4757';fb.style.background='rgba(255,71,87,.06)';
+    fb.innerHTML='<strong style="color:#ff4757;font-family:Orbitron,monospace;font-size:.52rem">✗ NOT QUITE</strong><br>'+q.fact;
+    fb.style.display='block';
+  }
+  document.getElementById('q-next').style.display='block';
+}
+ 
+function nextQuestion(){qCurrent++;renderQuestion();}
+ 
+function endQuiz(){
+  earnBadge('first_quiz','🎯','FIRST QUIZ');
+  const xp=qScore===10?150:qScore>=7?100:qScore>=5?60:30;
+  addXP(xp);
+  if(qScore===10)earnBadge('perfect_quiz','⭐','PERFECT QUIZ');
+  const best=parseInt(localStorage.getItem('quiz-best')||0);
+  if(qScore>best)localStorage.setItem('quiz-best',qScore);
+  document.getElementById('quiz-best').textContent=Math.max(qScore,best)+'/10';
+  if(totalXP>=100)earnBadge('xp100','🏆','100 XP');
+  if(totalXP>=500)earnBadge('xp500','💎','500 XP');
+  document.getElementById('q-text').innerHTML=`<div style="text-align:center;padding:1rem 0"><div style="font-size:2rem;margin-bottom:.5rem">${qScore>=8?'🏆':qScore>=5?'⭐':'🚀'}</div><div style="font-family:Orbitron,monospace;font-size:1rem;color:#ffc857;margin-bottom:.3rem">${qScore}/10 CORRECT</div><div style="font-size:.8rem;color:rgba(180,220,240,.6);margin-bottom:1rem">+${xp} XP EARNED</div><button onclick="initQuiz()" style="font-family:Orbitron,monospace;font-size:.55rem;letter-spacing:.15em;padding:.65rem 1.5rem;border:1px solid #00d4ff;background:rgba(0,212,255,.08);color:#00d4ff;cursor:pointer">PLAY AGAIN ↩</button></div>`;
+  document.getElementById('q-opts').innerHTML='';
+  document.getElementById('q-feedback').style.display='none';
+  document.getElementById('q-next').style.display='none';
+  document.getElementById('q-progress').style.width='100%';
+}
+ 
+/* ═══════════ PLANET BUILDER ═══════════ */
+const PLANETS_DATA=[
+  {n:'MERCURY',e:'☿',c:'#aaaaaa',f:'Closest to Sun · 88 Earth days per year · No atmosphere · Surface like our Moon · Temperatures: -180°C to 430°C'},
+  {n:'VENUS',e:'♀',c:'#e8d5b0',f:'Hottest planet (462°C) despite not being closest · Rotates backwards · A day longer than its year · Crushing CO₂ atmosphere'},
+  {n:'EARTH',e:'🌍',c:'#3a7de8',f:'The only known planet with life · 71% ocean · Perfect distance from Sun (Goldilocks Zone) · Magnetic field protects us'},
+  {n:'MARS',e:'♂',c:'#c1440e',f:'Home to Olympus Mons (tallest volcano, 22km) · Two tiny moons · Day is 24h 37min · Target for human missions in the 2030s'},
+  {n:'JUPITER',e:'♃',c:'#c88b3a',f:'Largest planet (1,300 Earths fit inside) · Great Red Spot storm: 400+ years old · 95 moons including Europa with possible ocean'},
+  {n:'SATURN',e:'♄',c:'#e4d191',f:'Least dense planet (would float on water!) · Rings are mostly water ice · 146 moons · Titan has a thick nitrogen atmosphere'},
+  {n:'URANUS',e:'⛢',c:'#7de8e8',f:'Rotates on its side (98° tilt) · Ice giant · Coldest atmosphere (-224°C) · Rings are nearly vertical'},
+  {n:'NEPTUNE',e:'♆',c:'#3f54ba',f:'Strongest winds in solar system (2,100 km/h) · 165 Earth years per orbit · Triton orbits backwards — probably captured from Kuiper Belt'},
+];
+ 
+let blTimer,blTime=60,blScore=0,blDragging=null,blPlaced={};
+ 
+function initBuilder(){
+  blTime=60;blScore=0;blPlaced={};
+  document.getElementById('bl-score').textContent='0';
+  document.getElementById('bl-fact').style.display='none';
+  clearInterval(blTimer);
+  blTimer=setInterval(()=>{
+    blTime--;document.getElementById('bl-timer').textContent=blTime;
+    if(blTime<=0){clearInterval(blTimer);endBuilder();}
+  },1000);
+  renderBuilderSlots();renderBuilderTray();
+}
+ 
+function renderBuilderSlots(){
+  const el=document.getElementById('bl-slots');
+  el.innerHTML=PLANETS_DATA.map((_,i)=>`
+    <div class="bl-slot" id="slot-${i}" data-slot="${i}"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="dropPlanet(event,${i})">
+      <div style="font-size:1.2rem;margin-bottom:.2rem">${i+1}</div>
+      <div style="font-size:.38rem;color:rgba(180,220,240,.3)">${i===0?'NEAREST':i===7?'FARTHEST':''}</div>
+    </div>`).join('');
+}
+ 
+function renderBuilderTray(){
+  const shuffled=[...PLANETS_DATA].sort(()=>Math.random()-.5);
+  document.getElementById('bl-tray').innerHTML=shuffled.map(p=>`
+    <div class="bl-planet" draggable="true" id="planet-${p.n}"
+      ondragstart="blDragging='${p.n}'"
+      ondragend="this.style.opacity='1'">
+      <span style="font-size:1.3rem">${p.e}</span>
+      <span style="color:${p.c};font-size:.44rem">${p.n}</span>
+    </div>`).join('');
+}
+ 
+function dropPlanet(e,slotIdx){
+  e.preventDefault();
+  const slot=document.getElementById('slot-'+slotIdx);
+  slot.classList.remove('drag-over');
+  if(!blDragging||blPlaced[slotIdx])return;
+  const correct=PLANETS_DATA[slotIdx].n===blDragging;
+  const planet=PLANETS_DATA.find(p=>p.n===blDragging);
+  if(correct){
+    slot.innerHTML=`<span style="font-size:1.5rem">${planet.e}</span><span style="font-family:Orbitron,monospace;font-size:.38rem;color:${planet.c};margin-top:.2rem">${planet.n}</span>`;
+    slot.classList.add('correct');blPlaced[slotIdx]=blDragging;
+    const planetEl=document.getElementById('planet-'+blDragging);
+    if(planetEl)planetEl.remove();
+    blScore++;document.getElementById('bl-score').textContent=blScore;
+    // Show fact
+    const fb=document.getElementById('bl-fact');
+    fb.innerHTML='<strong style="font-family:Orbitron,monospace;font-size:.5rem;color:#ffc857">'+planet.n+'</strong><br>'+planet.f;
+    fb.style.display='block';
+    if(blScore===8){clearInterval(blTimer);earnBadge('builder_win','🪐','PLANET BUILDER');endBuilder();}
+  }else{
+    slot.classList.add('wrong');
+    setTimeout(()=>slot.classList.remove('wrong'),400);
+  }
+  blDragging=null;
+}
+ 
+function resetBuilder(){clearInterval(blTimer);initBuilder();}
+ 
+function endBuilder(){
+  clearInterval(blTimer);
+  const timeBonus=Math.max(0,blTime*2);
+  const xp=blScore*25+timeBonus;
+  addXP(xp);
+  const best=parseInt(localStorage.getItem('builder-best')||0);
+  if(blScore>best)localStorage.setItem('builder-best',blScore);
+  document.getElementById('builder-best').textContent=Math.max(blScore,best)+'/8';
+  if(totalXP>=100)earnBadge('xp100','🏆','100 XP');
+  document.getElementById('bl-fact').innerHTML=`<div style="text-align:center"><div style="font-size:1.8rem;margin-bottom:.4rem">${blScore===8?'🏆':'🪐'}</div><div style="font-family:Orbitron,monospace;font-size:.85rem;color:#ffc857">${blScore}/8 CORRECT · +${xp} XP</div><br><button onclick="initBuilder()" style="font-family:Orbitron,monospace;font-size:.52rem;padding:.6rem 1.2rem;border:1px solid #ffc857;background:rgba(255,200,87,.08);color:#ffc857;cursor:pointer">PLAY AGAIN ↩</button></div>`;
+  document.getElementById('bl-fact').style.display='block';
+  document.getElementById('bl-timer').textContent='0';
+}
+ 
+/* ═══════════ ASTEROID DODGE ═══════════ */
+const SPACE_FACTS=[
+  'The ISS travels at 7.66 km/s — fast enough to circle Earth in 92 minutes!',
+  'There are more stars in the universe than grains of sand on all Earth\'s beaches.',
+  'A neutron star teaspoon weighs 1 billion tonnes.',
+  'The Sun converts 4 million tonnes of mass into energy every second.',
+  'Light from the Sun takes 8 minutes 20 seconds to reach Earth.',
+  'Saturn\'s rings are only about 10 metres thick despite spanning 282,000 km.',
+  'Jupiter has a storm (Great Red Spot) that\'s been raging for over 400 years.',
+  'Venus is hotter than Mercury despite being farther from the Sun.',
+  'The Milky Way galaxy is 100,000 light-years across.',
+  'Black holes bend light — you can see stars "behind" a black hole.',
+  'Astronauts grow 2–3 cm taller in space as their spine decompresses.',
+  'The Moon is moving away from Earth at 3.8 cm per year.',
+  'You could fit all 8 planets between Earth and Moon.',
+  'A day on Venus is longer than a year on Venus.',
+  'The ISS has been continuously inhabited since November 2000.',
+];
+ 
+let dgCanvas,dgCtx,dgRunning=false,dgAnimId,dgShip,dgAsteroids,dgTime,dgLives,dgLastFact,dgFactTimer,dgSpeed;
+ 
+function startDodge(){
+  dgCanvas=document.getElementById('dg-canvas');
+  dgCtx=dgCanvas.getContext('2d');
+  document.getElementById('dg-overlay').style.display='none';
+  document.getElementById('dg-fact').style.display='none';
+  dgShip={x:dgCanvas.width/2,y:dgCanvas.height-60,w:22,h:32,vx:0,vy:0,thrusting:false};
+  dgAsteroids=[];dgTime=0;dgLives=3;dgSpeed=1.2;dgLastFact=0;dgFactTimer=null;
+  document.getElementById('dg-lives').textContent=3;
+  document.getElementById('dg-time').textContent=0;
+  const best=parseInt(localStorage.getItem('dodge-best')||0);
+  document.getElementById('dg-best-show').textContent=best;
+  dgRunning=true;
+  // Spawn asteroids
+  clearInterval(dgFactTimer);
+  dgFactTimer=setInterval(()=>{
+    if(dgRunning){
+      const fact=SPACE_FACTS[Math.floor(Math.random()*SPACE_FACTS.length)];
+      const fb=document.getElementById('dg-fact');
+      fb.innerHTML='<strong style="font-family:Orbitron,monospace;font-size:.5rem;color:#00d4ff">💡 SPACE FACT</strong><br>'+fact;
+      fb.style.display='block';
+      setTimeout(()=>{if(fb)fb.style.display='none';},5000);
+    }
+  },12000);
+  cancelAnimationFrame(dgAnimId);
+  dgLoop();
+}
+ 
+function stopDodge(){
+  dgRunning=false;
+  cancelAnimationFrame(dgAnimId);
+  clearInterval(dgFactTimer);
+}
+ 
+const keys={};
+document.addEventListener('keydown',e=>{keys[e.key]=true;});
+document.addEventListener('keyup',e=>{keys[e.key]=false;});
+ 
+// Touch support for dodge
+let dgTouchDir=null;
+document.addEventListener('DOMContentLoaded',()=>{
+  const cv=document.getElementById('dg-canvas');
+  if(cv){
+    cv.addEventListener('touchstart',e=>{
+      const t=e.touches[0];
+      dgTouchDir=t.clientX<cv.getBoundingClientRect().left+cv.width/2?'left':'right';
+    },{passive:true});
+    cv.addEventListener('touchend',()=>dgTouchDir=null,{passive:true});
+  }
+});
+ 
+function dgLoop(){
+  if(!dgRunning)return;
+  dgAnimId=requestAnimationFrame(dgLoop);
+  const W=dgCanvas.width,H=dgCanvas.height;
+  dgCtx.fillStyle='#00000f';dgCtx.fillRect(0,0,W,H);
+ 
+  // Stars background
+  dgCtx.fillStyle='rgba(255,255,255,.5)';
+  for(let i=0;i<40;i++){
+    const sx=(i*73+dgTime*.5)%W,sy=(i*37+i*11)%H;
+    dgCtx.fillRect(sx,sy,1,1);
+  }
+ 
+  // Ship controls
+  if(keys['ArrowLeft']||keys['a']||dgTouchDir==='left')dgShip.vx-=.4;
+  if(keys['ArrowRight']||keys['d']||dgTouchDir==='right')dgShip.vx+=.4;
+  if(keys['ArrowUp']||keys['w'])dgShip.vy-=.3;
+  if(keys['ArrowDown']||keys['s'])dgShip.vy+=.3;
+  dgShip.vx*=.88;dgShip.vy*=.88;
+  dgShip.x=Math.max(dgShip.w,Math.min(W-dgShip.w,dgShip.x+dgShip.vx));
+  dgShip.y=Math.max(dgShip.h,Math.min(H-dgShip.h,dgShip.y+dgShip.vy));
+ 
+  // Draw ship (ISS shape)
+  dgCtx.save();dgCtx.translate(dgShip.x,dgShip.y);
+  dgCtx.fillStyle='#00d4ff';dgCtx.fillRect(-5,-16,10,32);  // body
+  dgCtx.fillStyle='rgba(0,212,255,.5)';dgCtx.fillRect(-22,-4,44,8);  // solar panels
+  dgCtx.fillStyle='#00ffff';dgCtx.fillRect(-3,-3,6,6);  // center module
+  // Thruster glow
+  if(Math.random()>.4){dgCtx.fillStyle='rgba(255,150,0,'+(Math.random()*.7+.3)+')';dgCtx.beginPath();dgCtx.arc(0,18,4+Math.random()*4,0,Math.PI*2);dgCtx.fill();}
+  dgCtx.restore();
+ 
+  // Spawn asteroids
+  dgTime++;
+  document.getElementById('dg-time').textContent=Math.floor(dgTime/60);
+  if(dgTime%Math.max(20,60-Math.floor(dgTime/120))===0){
+    dgSpeed=1.2+dgTime/800;
+    dgAsteroids.push({
+      x:Math.random()*W,y:-20,
+      vx:(Math.random()-.5)*2.5,vy:dgSpeed+Math.random()*1.5,
+      r:12+Math.random()*20,
+      rot:Math.random()*Math.PI*2,rotv:(Math.random()-.5)*.08,
+      sides:Math.floor(6+Math.random()*4)
+    });
+  }
+ 
+  // Draw and move asteroids
+  dgAsteroids=dgAsteroids.filter(a=>{
+    a.x+=a.vx;a.y+=a.vy;a.rot+=a.rotv;
+    if(a.y>H+30||a.x<-50||a.x>W+50)return false;
+    dgCtx.save();dgCtx.translate(a.x,a.y);dgCtx.rotate(a.rot);
+    dgCtx.fillStyle='#776655';dgCtx.strokeStyle='#998866';dgCtx.lineWidth=1.5;
+    dgCtx.beginPath();
+    for(let i=0;i<a.sides;i++){
+      const ang=(i/a.sides)*Math.PI*2;
+      const r2=a.r*(0.8+Math.sin(i*2.3)*.2);
+      i===0?dgCtx.moveTo(Math.cos(ang)*r2,Math.sin(ang)*r2):dgCtx.lineTo(Math.cos(ang)*r2,Math.sin(ang)*r2);
+    }
+    dgCtx.closePath();dgCtx.fill();dgCtx.stroke();dgCtx.restore();
+    // Collision
+    const dx=a.x-dgShip.x,dy=a.y-dgShip.y;
+    if(Math.hypot(dx,dy)<a.r+14){
+      dgLives--;document.getElementById('dg-lives').textContent=dgLives;
+      if(dgLives<=0){endDodge();return false;}
+      return false;
+    }
+    return true;
+  });
+ 
+  // HUD
+  dgCtx.fillStyle='rgba(0,212,255,.12)';dgCtx.fillRect(0,0,W,28);
+  dgCtx.font='10px Orbitron,monospace';dgCtx.fillStyle='#00d4ff';
+  dgCtx.fillText('TIME: '+Math.floor(dgTime/60)+'s',10,18);
+  dgCtx.fillStyle='#ff4757';
+  dgCtx.fillText('LIVES: '+'❤'.repeat(dgLives),W/2-30,18);
+  dgCtx.fillStyle='#ffc857';
+  dgCtx.fillText('BEST: '+localStorage.getItem('dodge-best')+'s',W-90,18);
+}
+ 
+function endDodge(){
+  dgRunning=false;cancelAnimationFrame(dgAnimId);clearInterval(dgFactTimer);
+  const survived=Math.floor(dgTime/60);
+  const xp=survived*10;addXP(xp);
+  const best=parseInt(localStorage.getItem('dodge-best')||0);
+  if(survived>best){localStorage.setItem('dodge-best',survived);document.getElementById('dodge-best').textContent=survived;}
+  document.getElementById('dg-best-show').textContent=Math.max(survived,best);
+  if(survived>=30)earnBadge('dodge30','🚀','SURVIVOR 30s');
+  if(totalXP>=100)earnBadge('xp100','🏆','100 XP');
+  const ov=document.getElementById('dg-overlay');
+  document.getElementById('dg-ov-title').textContent='MISSION ENDED';
+  document.getElementById('dg-ov-sub').innerHTML=`Survived: ${survived} seconds<br>+${xp} XP earned<br><br>`;
+  ov.style.display='flex';
+}
+</script>
+ 
 </body>
 </html>
