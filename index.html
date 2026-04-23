@@ -3,343 +3,675 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Orbit-Edu — Live Space Tracker</title>
+<title>Orbit-Edu v2 — Live Space Tracker</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --space:#00000a;
-  --accent:#00d4ff;
-  --accent-dim:rgba(0,212,255,0.3);
-  --gold:#ffc857;
-  --danger:#ff4757;
-  --success:#2ed573;
-  --text:#cce8f4;
-  --muted:rgba(180,220,240,0.45);
-  --panel:rgba(5,15,35,0.78);
-  --edge:rgba(0,200,255,0.15);
-  --fd:'Orbitron',monospace;
-  --fb:'Rajdhani',sans-serif;
-}
-html,body{width:100%;height:100%;background:var(--space);color:var(--text);font-family:var(--fb);overflow:hidden}
-#s-intro,#s-dash{position:fixed;inset:0;transition:opacity 1s ease}
-#s-dash{opacity:0;pointer-events:none;display:none}
-#s-dash.on{opacity:1;pointer-events:all}
-#c-solar,#c-earth{position:absolute;inset:0;width:100%;height:100%}
-#c-earth{cursor:grab}
-#c-earth:active{cursor:grabbing}
-#intro-wrap{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);text-align:center;z-index:10}
-.i-eye{font-family:var(--fd);font-size:.6rem;letter-spacing:.6em;color:var(--accent);opacity:0;animation:fu 1s .8s forwards}
-.i-title{font-family:var(--fd);font-size:clamp(2.8rem,9vw,6.5rem);font-weight:900;letter-spacing:.08em;color:var(--text);opacity:0;animation:fu 1s 1.1s forwards;text-shadow:0 0 60px rgba(0,212,255,.35);line-height:1;margin:.3rem 0}
-.i-title span{color:var(--accent);text-shadow:0 0 40px var(--accent)}
-.i-sub{font-size:.9rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);opacity:0;animation:fu 1s 1.4s forwards}
-.i-bar{width:50px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:1.2rem auto;opacity:0;animation:fu 1s 1.6s forwards}
-#enter-btn{font-family:var(--fd);font-size:.75rem;letter-spacing:.25em;padding:.85rem 2.5rem;border:1px solid var(--accent);background:rgba(0,212,255,.08);color:var(--accent);cursor:pointer;opacity:0;animation:fu 1s 1.9s forwards;transition:all .3s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)}
-#enter-btn:hover{background:rgba(0,212,255,.2);box-shadow:0 0 25px rgba(0,212,255,.4)}
-#lbar-wrap{position:absolute;bottom:3%;left:50%;transform:translateX(-50%);width:260px;text-align:center;z-index:10}
-#lbar-fill{width:0%;height:2px;background:linear-gradient(90deg,var(--accent-dim),var(--accent));transition:width .3s;box-shadow:0 0 8px var(--accent);margin-bottom:.4rem}
-#lbar-txt{font-family:var(--fd);font-size:.5rem;letter-spacing:.3em;color:var(--muted)}
-.scan{position:absolute;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
-#nav{position:absolute;top:0;left:0;right:0;height:54px;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(0,5,20,.82);border-bottom:1px solid var(--edge);backdrop-filter:blur(16px)}
-.n-logo{font-family:var(--fd);font-size:1.05rem;font-weight:900;letter-spacing:.1em}
-.n-logo span{color:var(--accent)}
-.n-links{display:flex;gap:1.2rem}
-.n-item{font-family:var(--fd);font-size:.55rem;letter-spacing:.18em;color:var(--muted);cursor:pointer;padding:.25rem .5rem;border-bottom:1px solid transparent;transition:all .25s}
-.n-item:hover,.n-item.act{color:var(--accent);border-bottom-color:var(--accent)}
-#utc{font-family:var(--fd);font-size:.65rem;letter-spacing:.12em;color:var(--gold)}
-.gpanel{position:absolute;top:66px;width:290px;max-height:calc(100vh - 110px);overflow-y:auto;z-index:20;background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(20px);padding:1.1rem;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
-.gpanel::-webkit-scrollbar{width:3px}
-.gpanel::-webkit-scrollbar-thumb{background:var(--accent-dim);border-radius:2px}
-#pl{left:.9rem}
-#pr{right:.9rem}
-.ph{font-family:var(--fd);font-size:.58rem;letter-spacing:.22em;color:var(--accent);border-bottom:1px solid var(--edge);padding-bottom:.5rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.4rem}
-.pdot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pdot 2s infinite;flex-shrink:0}
-.dr{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid rgba(0,212,255,.05)}
-.dl{font-size:.65rem;letter-spacing:.1em;color:var(--muted);font-family:var(--fd)}
-.dv{font-size:.82rem;font-weight:600;color:var(--text)}
-.ok{color:var(--success)}.err{color:var(--danger)}
-.pbtn{display:block;width:100%;margin-top:.7rem;padding:.6rem;font-family:var(--fd);font-size:.58rem;letter-spacing:.18em;border:1px solid var(--accent);background:rgba(0,212,255,.08);color:var(--accent);cursor:pointer;transition:all .3s;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%)}
-.pbtn:hover{background:rgba(0,212,255,.2);box-shadow:0 0 18px rgba(0,212,255,.35)}
-.pbtn.sec{border-color:var(--muted);color:var(--muted);background:transparent}
-.pbtn.sec:hover{border-color:var(--text);color:var(--text);box-shadow:none}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.9rem}
-.sbox{background:rgba(0,212,255,.04);border:1px solid var(--edge);padding:.65rem .4rem;text-align:center;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
-.snum{font-family:var(--fd);font-size:.95rem;font-weight:700;color:var(--gold);line-height:1.1}
-.sunit{font-size:.5rem;color:var(--muted);margin-left:.15rem}
-.slbl{font-family:var(--fd);font-size:.45rem;letter-spacing:.12em;color:var(--muted);margin-top:.25rem}
+:root{--a:#00d4ff;--g:#ffc857;--d:#ff4757;--s:#2ed573;--t:#cce8f4;--m:rgba(180,220,240,.45);--p:rgba(4,10,28,.88);--e:rgba(0,200,255,.18);--fd:'Orbitron',monospace;--fb:'Rajdhani',sans-serif}
+html,body{width:100%;height:100%;background:#00000a;color:var(--t);font-family:var(--fb);overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+#si,#sd{position:fixed;inset:0}
+#sd{display:none;opacity:0;transition:opacity .8s}
+#sd.on{opacity:1}
+/* INTRO */
+#iw{position:absolute;bottom:9%;left:50%;transform:translateX(-50%);text-align:center;z-index:10}
+.ie{font-family:var(--fd);font-size:.58rem;letter-spacing:.6em;color:var(--a);opacity:0;animation:fu 1s .8s forwards}
+.it{font-family:var(--fd);font-size:clamp(3rem,9vw,7rem);font-weight:900;letter-spacing:.07em;color:var(--t);opacity:0;animation:fu 1s 1.1s forwards;text-shadow:0 0 80px rgba(0,212,255,.3);line-height:1;margin:.3rem 0}
+.it span{color:var(--a)}
+.is{font-size:.88rem;letter-spacing:.26em;text-transform:uppercase;color:var(--m);opacity:0;animation:fu 1s 1.4s forwards}
+.ib{width:55px;height:1px;background:linear-gradient(90deg,transparent,var(--a),transparent);margin:1.4rem auto;opacity:0;animation:fu 1s 1.7s forwards}
+#eb{font-family:var(--fd);font-size:.72rem;letter-spacing:.26em;padding:.9rem 2.8rem;border:1px solid var(--a);background:rgba(0,212,255,.07);color:var(--a);cursor:pointer;opacity:0;animation:fu 1s 2s forwards;transition:all .35s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)}
+#eb:hover{background:rgba(0,212,255,.18);box-shadow:0 0 35px rgba(0,212,255,.4)}
+#lw{position:absolute;bottom:2.5%;left:50%;transform:translateX(-50%);width:300px;text-align:center;z-index:10}
+#lf{width:0%;height:1px;background:linear-gradient(90deg,rgba(0,212,255,.2),var(--a));transition:width .25s;margin-bottom:.5rem}
+#lt{font-family:var(--fd);font-size:.48rem;letter-spacing:.3em;color:var(--m)}
+/* DASH */
+.sc{position:absolute;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.018) 2px,rgba(0,0,0,.018) 4px)}
+#nav{position:absolute;top:0;left:0;right:0;height:52px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;background:rgba(0,3,15,.92);border-bottom:1px solid var(--e);backdrop-filter:blur(20px)}
+.nl{font-family:var(--fd);font-size:1rem;font-weight:900;letter-spacing:.1em}
+.nl span{color:var(--a)}
+.nk{display:flex;gap:.2rem;flex-wrap:nowrap}
+.ni{font-family:var(--fd);font-size:.46rem;letter-spacing:.12em;color:var(--m);cursor:pointer;padding:.28rem .5rem;border:1px solid transparent;border-radius:2px;transition:all .2s;white-space:nowrap}
+.ni:hover{color:var(--a);border-color:rgba(0,212,255,.25);background:rgba(0,212,255,.04)}
+.ni.act{color:var(--a);border-color:var(--a);background:rgba(0,212,255,.07)}
+#uc{font-family:var(--fd);font-size:.6rem;letter-spacing:.1em;color:var(--g)}
+/* PANELS */
+.gp{position:absolute;top:64px;width:282px;max-height:calc(100vh - 108px);overflow-y:auto;z-index:20;background:var(--p);border:1px solid var(--e);backdrop-filter:blur(24px);padding:1rem;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.gp::-webkit-scrollbar{width:2px}
+.gp::-webkit-scrollbar-thumb{background:rgba(0,212,255,.22);border-radius:2px}
+#pl{left:.8rem}
+#pr{right:.8rem}
+.ph{font-family:var(--fd);font-size:.52rem;letter-spacing:.22em;color:var(--a);border-bottom:1px solid var(--e);padding-bottom:.5rem;margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem}
+.pd{width:7px;height:7px;border-radius:50%;background:var(--s);box-shadow:0 0 7px var(--s);animation:pda 2s infinite;flex-shrink:0}
+.dr{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid rgba(0,212,255,.04)}
+.dl{font-size:.57rem;letter-spacing:.1em;color:var(--m);font-family:var(--fd)}
+.dv{font-size:.8rem;font-weight:600;color:var(--t)}
+.ok{color:var(--s)}.er{color:var(--d)}
+.pb{display:block;width:100%;margin-top:.52rem;padding:.54rem;font-family:var(--fd);font-size:.5rem;letter-spacing:.16em;border:1px solid var(--a);background:rgba(0,212,255,.07);color:var(--a);cursor:pointer;transition:all .3s;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%)}
+.pb:hover{background:rgba(0,212,255,.18);box-shadow:0 0 18px rgba(0,212,255,.25)}
+.pb.s{border-color:var(--m);color:var(--m);background:transparent}
+.pb.s:hover{border-color:var(--t);color:var(--t)}
+.pb.gd{border-color:var(--g);color:var(--g);background:rgba(255,200,87,.05)}
+.pb.gd:hover{background:rgba(255,200,87,.14);box-shadow:0 0 16px rgba(255,200,87,.2)}
+.b2{display:grid;grid-template-columns:1fr 1fr;gap:.38rem;margin-top:.52rem}
+.b2 .pb{margin-top:0}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.75rem}
+.sb{background:rgba(0,212,255,.03);border:1px solid var(--e);padding:.54rem .35rem;text-align:center;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);transition:all .3s;cursor:default}
+.sb:hover{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.4)}
+.sn{font-family:var(--fd);font-size:.86rem;font-weight:700;color:var(--g);line-height:1.1}
+.su{font-size:.42rem;color:var(--m);margin-left:.1rem}
+.sl{font-family:var(--fd);font-size:.4rem;letter-spacing:.1em;color:var(--m);margin-top:.18rem}
 .sp{display:none}.sp.act{display:block}
-.pinfo{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.5rem}
-#apod-img{width:100%;max-height:155px;object-fit:cover;border:1px solid var(--edge);margin-bottom:.5rem;display:none}
-.atitle{font-family:var(--fd);font-size:.65rem;letter-spacing:.07em;color:var(--gold);margin-bottom:.2rem;line-height:1.4}
-.adate{font-size:.6rem;color:var(--muted);letter-spacing:.14em;margin-bottom:.4rem}
-.aexp{font-size:.72rem;color:var(--muted);line-height:1.6;max-height:130px;overflow-y:auto}
-.acopy{font-size:.58rem;color:rgba(180,220,240,.3);margin-top:.35rem;font-style:italic}
-.ci{display:flex;align-items:center;gap:.65rem;padding:.45rem 0;border-bottom:1px solid rgba(0,212,255,.06)}
-.cav{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dim),rgba(255,200,87,.2));border:1px solid var(--edge);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
-.cn{font-family:var(--fd);font-size:.6rem;color:var(--text);letter-spacing:.04em}
-.cc{font-size:.58rem;color:var(--accent);letter-spacing:.1em}
-.irow{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.65rem}
-.irow input{background:rgba(0,212,255,.05);border:1px solid var(--edge);color:var(--text);padding:.45rem .65rem;font-family:var(--fb);font-size:.78rem;outline:none;width:100%;transition:border-color .2s}
-.irow input:focus{border-color:var(--accent)}
-.irow input::placeholder{color:var(--muted)}
-.pi{background:rgba(0,212,255,.04);border:1px solid var(--edge);border-left:3px solid var(--accent);padding:.55rem .7rem;margin-bottom:.35rem}
-.pt{font-family:var(--fd);font-size:.6rem;color:var(--gold);letter-spacing:.07em}
-.pd{font-size:.68rem;color:var(--muted);margin-top:.12rem}
-.lmsg{font-family:var(--fd);font-size:.58rem;letter-spacing:.2em;color:var(--accent);text-align:center;padding:.9rem 0;animation:blink 1.5s infinite}
-#sbar{position:absolute;bottom:0;left:0;right:0;height:34px;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(0,5,20,.88);border-top:1px solid var(--edge);backdrop-filter:blur(16px);font-size:.58rem;letter-spacing:.1em;color:var(--muted);font-family:var(--fd)}
-#tip{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);z-index:20;background:var(--panel);border:1px solid var(--accent);backdrop-filter:blur(12px);padding:.45rem .9rem;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
-#tip.on{opacity:1}
-.tt{font-family:var(--fd);font-size:.55rem;letter-spacing:.18em;color:var(--accent);margin-bottom:.15rem}
-.tb{font-size:.72rem;color:var(--text);letter-spacing:.04em}
-@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pdot{0%,100%{box-shadow:0 0 6px var(--success);opacity:1}50%{box-shadow:0 0 14px var(--success);opacity:.5}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.pi{font-size:.74rem;color:var(--m);line-height:1.65;margin-bottom:.55rem}
+/* APOD */
+#ai{width:100%;max-height:148px;object-fit:cover;border:1px solid var(--e);margin-bottom:.48rem;display:none;cursor:pointer}
+.at{font-family:var(--fd);font-size:.58rem;color:var(--g);margin-bottom:.18rem;line-height:1.45}
+.ad{font-size:.54rem;color:var(--m);letter-spacing:.14em;margin-bottom:.36rem}
+.ae{font-size:.67rem;color:var(--m);line-height:1.65;max-height:110px;overflow-y:auto}
+.apb{display:flex;gap:.32rem;margin-top:.42rem}
+.apb button{flex:1;font-family:var(--fd);font-size:.42rem;letter-spacing:.1em;padding:.36rem;border:1px solid var(--e);background:transparent;color:var(--m);cursor:pointer;transition:all .2s}
+.apb button:hover{border-color:var(--a);color:var(--a)}
+/* CREW */
+.ci{display:flex;align-items:center;gap:.58rem;padding:.44rem 0;border-bottom:1px solid rgba(0,212,255,.05)}
+.ca{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(255,200,87,.14));border:1px solid var(--e);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.cn{font-family:var(--fd);font-size:.53rem;color:var(--t)}
+.cc{font-size:.57rem;color:var(--a);margin-top:.07rem}
+.cb{font-family:var(--fd);font-size:2.8rem;font-weight:900;color:var(--g);text-align:center;padding:.4rem 0 0}
+.cs{font-family:var(--fd);font-size:.44rem;letter-spacing:.24em;color:var(--m);text-align:center;margin-bottom:.44rem}
+/* PASSES */
+.ir{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.58rem}
+.ir input{background:rgba(0,212,255,.05);border:1px solid var(--e);color:var(--t);padding:.42rem .6rem;font-family:var(--fb);font-size:.76rem;outline:none;width:100%;transition:border-color .2s}
+.ir input:focus{border-color:var(--a)}
+.ir input::placeholder{color:var(--m)}
+.px{background:rgba(0,212,255,.04);border:1px solid var(--e);border-left:2px solid var(--a);padding:.5rem .62rem;margin-bottom:.3rem}
+.pxt{font-family:var(--fd);font-size:.53rem;color:var(--g)}
+.pxd{font-size:.63rem;color:var(--m);margin-top:.1rem}
+/* EXPLORE */
+.ec{background:rgba(0,212,255,.03);border:1px solid var(--e);padding:.68rem;margin-bottom:.36rem;cursor:pointer;transition:all .25s;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
+.ec:hover{background:rgba(0,212,255,.09);border-color:rgba(0,212,255,.4)}
+.ei{font-size:1.1rem;margin-bottom:.26rem}
+.et{font-family:var(--fd);font-size:.55rem;color:var(--a);letter-spacing:.1em;margin-bottom:.18rem}
+.ed{font-size:.66rem;color:var(--m);line-height:1.5}
+/* SATELLITES */
+.si2{background:rgba(0,212,255,.03);border:1px solid var(--e);padding:.58rem;margin-bottom:.32rem;border-left:2px solid var(--g)}
+.sn2{font-family:var(--fd);font-size:.53rem;color:var(--g)}
+.si3{font-size:.63rem;color:var(--m);margin-top:.1rem;line-height:1.4}
+/* LOADING */
+.lm{font-family:var(--fd);font-size:.53rem;letter-spacing:.2em;color:var(--a);text-align:center;padding:.9rem 0;animation:bk 1.5s infinite}
+/* SBAR */
+#sb{position:absolute;bottom:0;left:0;right:0;height:31px;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;background:rgba(0,3,15,.94);border-top:1px solid var(--e);backdrop-filter:blur(16px);font-size:.5rem;letter-spacing:.1em;color:var(--m);font-family:var(--fd)}
+/* TOOLTIP */
+#tp{position:absolute;bottom:42px;left:50%;transform:translateX(-50%);z-index:25;background:var(--p);border:1px solid var(--a);backdrop-filter:blur(14px);padding:.4rem .82rem;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
+#tp.on{opacity:1}
+.tt{font-family:var(--fd);font-size:.5rem;letter-spacing:.18em;color:var(--a);margin-bottom:.1rem}
+.tb{font-size:.66rem;color:var(--t)}
+/* POPUP */
+#pp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;background:rgba(2,8,22,.97);border:1px solid var(--a);backdrop-filter:blur(30px);padding:2rem;width:420px;max-width:94vw;max-height:76vh;overflow-y:auto;display:none;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+#pp.on{display:block;animation:fu .4s ease}
+.pc{position:absolute;top:.75rem;right:.75rem;font-family:var(--fd);font-size:.55rem;color:var(--m);cursor:pointer;padding:.18rem .45rem;border:1px solid var(--e);transition:all .2s}
+.pc:hover{color:var(--a);border-color:var(--a)}
+.ppi{font-size:2.4rem;text-align:center;margin-bottom:.7rem}
+.ppt{font-family:var(--fd);font-size:.85rem;color:var(--a);letter-spacing:.1em;text-align:center;margin-bottom:.25rem}
+.pps{font-size:.65rem;color:var(--g);letter-spacing:.2em;text-align:center;margin-bottom:.9rem;text-transform:uppercase}
+.ppb{font-size:.78rem;color:var(--m);line-height:1.8}
+.pf{background:rgba(0,212,255,.05);border-left:2px solid var(--a);padding:.48rem .76rem;margin:.55rem 0;font-size:.73rem;color:var(--t)}
+.pf strong{color:var(--g);font-family:var(--fd);font-size:.5rem;letter-spacing:.1em;display:block;margin-bottom:.18rem}
+@keyframes fu{from{opacity:0;transform:translate(-50%,-48%)}to{opacity:1;transform:translate(-50%,-50%)}}
+@keyframes pda{0%,100%{box-shadow:0 0 6px var(--s);opacity:1}50%{box-shadow:0 0 12px var(--s);opacity:.4}}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes fuu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.ie,.it,.is,.ib,#eb{animation-fill-mode:forwards}
+.ie{animation:fuu 1s .8s forwards}
+.it{animation:fuu 1s 1.1s forwards}
+.is{animation:fuu 1s 1.4s forwards}
+.ib{animation:fuu 1s 1.7s forwards}
+#eb{animation:fuu 1s 2s forwards}
 </style>
 </head>
 <body>
 
-<!-- ── INTRO SCREEN ───────────────────────── -->
-<div id="s-intro">
-  <canvas id="c-solar"></canvas>
-  <div id="intro-wrap">
-    <div class="i-eye">MISSION CONTROL</div>
-    <h1 class="i-title">ORBIT<span>EDU</span></h1>
-    <p class="i-sub">Real-time space exploration platform</p>
-    <div class="i-bar"></div>
-    <button id="enter-btn" onclick="enterDash()">&#9658; ENTER MISSION</button>
+<!-- INTRO SCREEN -->
+<div id="si">
+  <canvas id="cs"></canvas>
+  <div id="iw">
+    <div class="ie">MISSION CONTROL</div>
+    <h1 class="it">ORBIT<span>EDU</span></h1>
+    <p class="is">Real-time space exploration platform</p>
+    <div class="ib"></div>
+    <button id="eb" onclick="enterDash()">&#9658; ENTER MISSION</button>
   </div>
-  <div id="lbar-wrap">
-    <div id="lbar-fill"></div>
-    <div id="lbar-txt">INITIALISING SOLAR SYSTEM...</div>
-  </div>
+  <div id="lw"><div id="lf"></div><div id="lt">INITIALISING SOLAR SYSTEM...</div></div>
 </div>
 
-<!-- ── DASHBOARD SCREEN ──────────────────── -->
-<div id="s-dash">
-  <canvas id="c-earth"></canvas>
-  <div class="scan"></div>
+<!-- DASHBOARD -->
+<div id="sd">
+  <canvas id="ce"></canvas>
+  <div class="sc"></div>
 
   <nav id="nav">
-    <div class="n-logo">ORBIT<span>EDU</span></div>
-    <div class="n-links">
-      <span class="n-item act" onclick="showP('iss',this)">ISS TRACKER</span>
-      <span class="n-item" onclick="showP('apod',this)">NASA APOD</span>
-      <span class="n-item" onclick="showP('crew',this)">CREW</span>
-      <span class="n-item" onclick="showP('passes',this)">ISS PASSES</span>
+    <div class="nl">ORBIT<span>EDU</span></div>
+    <div class="nk">
+      <span class="ni act" onclick="showP('iss',this)">ISS TRACKER</span>
+      <span class="ni" onclick="showP('sats',this)">SATELLITES</span>
+      <span class="ni" onclick="showP('apod',this)">NASA APOD</span>
+      <span class="ni" onclick="showP('crew',this)">CREW</span>
+      <span class="ni" onclick="showP('passes',this)">ISS PASSES</span>
+      <span class="ni" onclick="showP('explore',this)">EXPLORE</span>
     </div>
-    <div id="utc">UTC 00:00:00</div>
+    <div id="uc">UTC 00:00:00</div>
   </nav>
 
   <!-- LEFT PANEL -->
-  <div class="gpanel" id="pl">
-    <div class="ph"><div class="pdot"></div>LIVE ISS TELEMETRY</div>
-    <div class="dr"><span class="dl">LATITUDE</span><span class="dv" id="v-lat">—</span></div>
-    <div class="dr"><span class="dl">LONGITUDE</span><span class="dv" id="v-lon">—</span></div>
-    <div class="dr"><span class="dl">ALTITUDE</span><span class="dv" id="v-alt">— km</span></div>
-    <div class="dr"><span class="dl">VELOCITY</span><span class="dv" id="v-vel">— km/s</span></div>
-    <div class="dr"><span class="dl">VISIBILITY</span><span class="dv" id="v-vis">—</span></div>
-    <div class="dr"><span class="dl">STATUS</span><span class="dv ok" id="v-sta">FETCHING...</span></div>
-    <button class="pbtn" onclick="flyISS()">&#9678; FLY TO ISS</button>
-    <button class="pbtn sec" onclick="resetCam()">&#8617; RESET VIEW</button>
+  <div class="gp" id="pl">
+    <div class="ph"><div class="pd"></div>LIVE ISS TELEMETRY</div>
+    <div class="dr"><span class="dl">LATITUDE</span><span class="dv" id="vl">—</span></div>
+    <div class="dr"><span class="dl">LONGITUDE</span><span class="dv" id="vn">—</span></div>
+    <div class="dr"><span class="dl">ALTITUDE</span><span class="dv" id="va">— km</span></div>
+    <div class="dr"><span class="dl">VELOCITY</span><span class="dv" id="vv">— km/s</span></div>
+    <div class="dr"><span class="dl">VISIBILITY</span><span class="dv" id="vx">—</span></div>
+    <div class="dr"><span class="dl">STATUS</span><span class="dv ok" id="vs">FETCHING...</span></div>
+    <div class="dr"><span class="dl">ORBIT COUNT</span><span class="dv">~15.5 / day</span></div>
+    <div class="b2">
+      <button class="pb" onclick="flyISS()">&#9678; FLY TO ISS</button>
+      <button class="pb s" onclick="resetCam()">&#8617; RESET</button>
+    </div>
+    <button class="pb gd" onclick="toggleTrail()">&#9632; TOGGLE TRAIL</button>
+    <button class="pb s" onclick="backToSolar()">&#9728; SOLAR SYSTEM</button>
   </div>
 
   <!-- RIGHT PANEL -->
-  <div class="gpanel" id="pr">
+  <div class="gp" id="pr">
+
     <div class="sp act" id="sp-iss">
       <div class="ph">ORBITAL STATS</div>
-      <p class="pinfo">The cyan marker shows the live ISS position. The trail shows its recent path.</p>
-      <div class="sgrid">
-        <div class="sbox"><div class="snum">92<span class="sunit">min</span></div><div class="slbl">ORBITAL PERIOD</div></div>
-        <div class="sbox"><div class="snum">408<span class="sunit">km</span></div><div class="slbl">AVG ALTITUDE</div></div>
-        <div class="sbox"><div class="snum">27,600<span class="sunit">km/h</span></div><div class="slbl">SPEED</div></div>
-        <div class="sbox"><div class="snum">16<span class="sunit">/day</span></div><div class="slbl">ORBITS EARTH</div></div>
+      <p class="pi">Cyan cone = live ISS. Blue trail = recent path. Drag to rotate. Scroll to zoom. Moon and Sun visible when you rotate!</p>
+      <div class="sg">
+        <div class="sb"><div class="sn">92<span class="su">min</span></div><div class="sl">ORBITAL PERIOD</div></div>
+        <div class="sb"><div class="sn">408<span class="su">km</span></div><div class="sl">AVG ALTITUDE</div></div>
+        <div class="sb"><div class="sn">7.66<span class="su">km/s</span></div><div class="sl">SPEED</div></div>
+        <div class="sb"><div class="sn">15.5<span class="su">/day</span></div><div class="sl">ORBITS EARTH</div></div>
+        <div class="sb"><div class="sn">420<span class="su">t</span></div><div class="sl">MASS</div></div>
+        <div class="sb"><div class="sn">1998<span class="su">yr</span></div><div class="sl">FIRST MODULE</div></div>
       </div>
     </div>
+
+    <div class="sp" id="sp-sats">
+      <div class="ph">SATELLITES IN ORBIT</div>
+      <p class="pi">Glowing dots visible around Earth in 3D. Hover to see name.</p>
+      <div class="si2"><div class="sn2">&#9679; ISS (INTERNATIONAL SPACE STATION)</div><div class="si3">Alt: 408 km · Speed: 27,600 km/h · Period: 92 min · Since 1998</div></div>
+      <div class="si2"><div class="sn2">&#9679; HUBBLE SPACE TELESCOPE</div><div class="si3">Alt: 547 km · Speed: 27,300 km/h · Active since 1990 · NASA</div></div>
+      <div class="si2"><div class="sn2">&#9679; GPS BLOCK III</div><div class="si3">Alt: 20,200 km · Period: 12 hrs · Navigation · US Space Force</div></div>
+      <div class="si2"><div class="sn2">&#9679; SENTINEL-6 / COPERNICUS</div><div class="si3">Alt: 1,336 km · Climate/ocean monitoring · ESA & NASA</div></div>
+      <div class="si2"><div class="sn2">&#9679; TIANGONG (CSS)</div><div class="si3">Alt: 390 km · Chinese Space Station · Since 2021 · CNSA</div></div>
+      <div class="si2"><div class="sn2">&#9679; JAMES WEBB TELESCOPE</div><div class="si3">L2 point · 1.5M km from Earth · Infrared · Since Dec 2021</div></div>
+    </div>
+
     <div class="sp" id="sp-apod">
       <div class="ph">NASA — ASTRONOMY PICTURE OF THE DAY</div>
-      <div class="lmsg" id="apod-load">FETCHING FROM NASA...</div>
-      <img id="apod-img" src="" alt="APOD"/>
-      <div class="atitle" id="apod-title"></div>
-      <div class="adate" id="apod-date"></div>
-      <div class="aexp" id="apod-exp"></div>
-      <div class="acopy" id="apod-copy"></div>
+      <div class="lm" id="ald">FETCHING FROM NASA...</div>
+      <img id="ai" src="" alt="APOD" onclick="window.open(this.getAttribute('data-hd')||this.src)"/>
+      <div class="at" id="att"></div>
+      <div class="ad" id="adt"></div>
+      <div class="ae" id="aex"></div>
+      <div class="apb">
+        <button onclick="changeApod(-1)">&#9664; PREV DAY</button>
+        <button onclick="changeApod(1)">NEXT DAY &#9654;</button>
+      </div>
     </div>
+
     <div class="sp" id="sp-crew">
-      <div class="ph">CREW IN SPACE</div>
-      <div class="lmsg" id="crew-load">FETCHING CREW...</div>
-      <div id="crew-list"></div>
+      <div class="ph">HUMANS IN SPACE RIGHT NOW</div>
+      <div class="lm" id="cld">FETCHING CREW DATA...</div>
+      <div class="cb" id="cnum">—</div>
+      <div class="cs">PEOPLE CURRENTLY IN SPACE</div>
+      <div id="clist"></div>
     </div>
+
     <div class="sp" id="sp-passes">
       <div class="ph">ISS PASS PREDICTIONS</div>
-      <p class="pinfo">Enter your coordinates to see when ISS flies over you.</p>
-      <div class="irow">
-        <input type="number" id="p-lat" placeholder="Latitude  (e.g. 28.61)" step="0.01"/>
-        <input type="number" id="p-lon" placeholder="Longitude (e.g. 77.20)" step="0.01"/>
+      <p class="pi">Enter your coordinates — see when ISS flies over. Visible to naked eye at night!</p>
+      <div class="ir">
+        <input type="number" id="plat" placeholder="Latitude (e.g. 28.61 for Delhi)" step="0.01"/>
+        <input type="number" id="plon" placeholder="Longitude (e.g. 77.20 for Delhi)" step="0.01"/>
       </div>
-      <button class="pbtn" onclick="getPasses()">CALCULATE PASSES</button>
-      <div class="lmsg" id="pass-load" style="display:none">CALCULATING...</div>
-      <div id="pass-list"></div>
+      <button class="pb" onclick="getPasses()">CALCULATE PASSES</button>
+      <div class="lm" id="pasld" style="display:none">CALCULATING ORBITAL PATH...</div>
+      <div id="paslist"></div>
     </div>
+
+    <div class="sp" id="sp-explore">
+      <div class="ph">EXPLORE THE UNIVERSE</div>
+      <div class="ec" onclick="showInfo('earth')"><div class="ei">&#127759;</div><div class="et">PLANET EARTH</div><div class="ed">Core structure, atmosphere, magnetic field and why life exists here</div></div>
+      <div class="ec" onclick="showInfo('moon')"><div class="ei">&#127761;</div><div class="et">THE MOON</div><div class="ed">Origin story, tides, far side, lunar phases and Apollo missions</div></div>
+      <div class="ec" onclick="showInfo('sun')"><div class="ei">&#9728;</div><div class="et">THE SUN</div><div class="ed">Nuclear fusion, solar wind, CMEs, sunspots and solar cycle</div></div>
+      <div class="ec" onclick="showInfo('solar')"><div class="ei">&#128762;</div><div class="et">SOLAR SYSTEM</div><div class="ed">All planets, asteroid belt, Kuiper Belt and Oort Cloud</div></div>
+      <div class="ec" onclick="showInfo('universe')"><div class="ei">&#10024;</div><div class="et">THE UNIVERSE</div><div class="ed">Big Bang, dark matter, black holes and the scale of everything</div></div>
+      <div class="ec" onclick="showInfo('iss')"><div class="ei">&#128640;</div><div class="et">LIFE ON THE ISS</div><div class="ed">Food, sleep, exercise, science and strange effects of microgravity</div></div>
+    </div>
+
   </div>
 
-  <div id="sbar">
-    <span>&#128760; ORBIT-EDU v1.0</span>
-    <span id="last-upd">Last update: —</span>
-    <span>NASA APOD + ISS Live + Crew Data</span>
+  <div id="sb">
+    <span>&#128760; ORBIT-EDU v2.0</span>
+    <span id="lu">Last update: —</span>
+    <span id="sv">VIEW: EARTH</span>
+    <span>NASA APOD + ISS Live + Crew</span>
   </div>
-  <div id="tip">
-    <div class="tt">&#127759; INTERNATIONAL SPACE STATION</div>
-    <div class="tb" id="tip-coords">—</div>
+
+  <div id="tp">
+    <div class="tt" id="ttt">ISS</div>
+    <div class="tb" id="ttb">—</div>
   </div>
 </div>
 
-<script>
-/* ── CONFIG ──────────────────────────────── */
-const API = 'https://achira25.pythonanywhere.com/api';
-const ISS_INTERVAL = 5000;
+<!-- INFO POPUP -->
+<div id="pp">
+  <div class="pc" onclick="closePopup()">&#10005; CLOSE</div>
+  <div class="ppi" id="pi2"></div>
+  <div class="ppt" id="pt2"></div>
+  <div class="pps" id="ps2"></div>
+  <div class="ppb" id="pb2"></div>
+</div>
 
-/* ── SOLAR SYSTEM ────────────────────────── */
-let solScene,solCam,solRen,solAF,planets=[];
+<script>
+/* CONFIG */
+const API='https://achira25.pythonanywhere.com/api';
+const ISS_INT=5000;
+
+/* KNOWLEDGE BASE */
+const INFO={
+  earth:{i:'🌍',t:'PLANET EARTH',s:'OUR HOME — THE PALE BLUE DOT',b:`
+    <div class="pf"><strong>THE BASICS</strong>Third planet from the Sun at 150 million km (1 AU). Only known planet with liquid water on its surface and confirmed life. Age: 4.54 billion years.</div>
+    <div class="pf"><strong>INTERIOR STRUCTURE</strong>4 layers: solid inner core (iron-nickel, 5,400°C), liquid outer core (generates our magnetic field), semi-solid mantle, and thin crust (5–70 km thick). The core is nearly as hot as the Sun's surface.</div>
+    <div class="pf"><strong>THE ATMOSPHERE</strong>78% Nitrogen, 21% Oxygen, 1% Argon + trace gases. Divided into: Troposphere (weather), Stratosphere (ozone), Mesosphere (meteors burn up), Thermosphere (ISS orbits here!), Exosphere (satellites).</div>
+    <div class="pf"><strong>MAGNETIC SHIELD</strong>Earth's liquid iron outer core generates a magnetosphere that deflects lethal solar wind. Without it, the atmosphere would be stripped away like on Mars. Auroras (Northern/Southern Lights) happen where solar particles squeeze through near the poles.</div>
+    <div class="pf"><strong>WILD FACT &#9889;</strong>Earth isn't a perfect sphere — it bulges at the equator (43 km wider). The farthest point from Earth's center isn't Everest but Mt. Chimborazo, Ecuador! Also, Earth's rotation is slowing — days used to be 6 hours long 4 billion years ago.</div>`},
+  moon:{i:'🌕',t:'THE MOON',s:"EARTH'S ONLY NATURAL SATELLITE",b:`
+    <div class="pf"><strong>THE BASICS</strong>Average distance: 384,400 km. Diameter: 3,474 km (about 1/4 of Earth). Takes 27.3 days to orbit — same time it rotates, so we always see the same face (tidal locking).</div>
+    <div class="pf"><strong>ORIGIN STORY</strong>~4.5 billion years ago, a Mars-sized body called Theia crashed into early Earth. Debris ejected into orbit gradually coalesced into the Moon. The Moon was 10× closer then and is drifting away at 3.8 cm/year.</div>
+    <div class="pf"><strong>TIDES & EFFECTS</strong>The Moon's gravity pulls Earth's oceans, creating 2 high tides per day. It also stabilises Earth's axial tilt at ~23.5° — without the Moon, our axis would wobble chaotically and seasons would be extreme.</div>
+    <div class="pf"><strong>THE FAR SIDE</strong>Never seen from Earth until 1959. Has far more craters and fewer "maria" (dark basaltic plains). China's Chang'e-4 made the first ever far-side landing in 2019.</div>
+    <div class="pf"><strong>WILD FACT &#9889;</strong>You could fit ALL the planets in our solar system between Earth and Moon with 7,600 km to spare! The Moon has moonquakes that last up to 1 hour (vs. seconds for Earth quakes). And 12 humans have walked on it — all between 1969 and 1972.</div>`},
+  sun:{i:'☀️',t:'THE SUN',s:'OUR STAR — A GIANT NUCLEAR REACTOR',b:`
+    <div class="pf"><strong>THE BASICS</strong>Contains 99.86% of all mass in our solar system. Surface temp: 5,500°C. Core temp: 15 million°C. 1.3 million Earths could fit inside. Age: 4.6 billion years. Lifespan: ~10 billion years total.</div>
+    <div class="pf"><strong>NUCLEAR FUSION</strong>Every second: 600 million tonnes of hydrogen → 596 million tonnes of helium. The missing 4 million tonnes becomes pure energy (E=mc²). That energy takes 170,000 years to travel from core to surface — then just 8 minutes to reach Earth!</div>
+    <div class="pf"><strong>SOLAR WIND & CMEs</strong>Constant stream of charged particles blasts into space. Coronal Mass Ejections (CMEs) can hurl billions of tonnes of plasma at Earth, causing auroras and disrupting satellites/power grids. The 1989 CME knocked out Quebec's power grid for 9 hours.</div>
+    <div class="pf"><strong>SUNSPOTS & 11-YEAR CYCLE</strong>Sunspots are cooler regions (3,500°C) of intense magnetic activity. Solar activity follows an 11-year cycle — more flares and CMEs during solar maximum. We're currently in Solar Cycle 25, approaching maximum.</div>
+    <div class="pf"><strong>FATE OF THE SUN &#9889;</strong>In ~5 billion years the Sun will expand into a Red Giant, possibly engulfing Earth. Then it'll shed outer layers as a Planetary Nebula and its core will remain as a White Dwarf — cooling for trillions of years. Eventually: a cold Black Dwarf (the universe isn't old enough for any to exist yet).</div>`},
+  solar:{i:'🪐',t:'THE SOLAR SYSTEM',s:'OUR COSMIC NEIGHBOURHOOD',b:`
+    <div class="pf"><strong>STRUCTURE</strong>Inner rocky planets (Mercury, Venus, Earth, Mars) → Asteroid Belt → Gas Giants (Jupiter, Saturn) → Ice Giants (Uranus, Neptune) → Kuiper Belt (Pluto, etc.) → Oort Cloud → Interstellar space. Total span: ~2 light-years.</div>
+    <div class="pf"><strong>ASTEROID BELT</strong>Mostly empty space between Mars and Jupiter. Total mass less than our Moon. Ceres is the largest body (945 km). Movies show it as a dense minefield — in reality you'd be lucky to spot an asteroid from within it.</div>
+    <div class="pf"><strong>JUPITER THE PROTECTOR</strong>Jupiter's enormous gravity captures or deflects many asteroids/comets heading for Earth. It's received multiple comet impacts we know of (Shoemaker-Levy 9, 1994). Without Jupiter, Earth would be hit ~1,000× more often.</div>
+    <div class="pf"><strong>SATURN'S RINGS</strong>Mostly water ice particles (cm to house-sized boulders). Only ~10 metres thick despite spanning 282,000 km. Relatively young (10–100 million years old) and will disappear in ~100 million years. If placed in a giant bathtub, Saturn would float!</div>
+    <div class="pf"><strong>WILD FACTS &#9889;</strong>A day on Venus (243 Earth days) is longer than its year (225 days). Venus rotates backwards. Uranus rotates on its side (98° tilt). The Great Red Spot on Jupiter is a storm that's lasted 400+ years. All planets in our solar system fit between Earth and Moon.</div>`},
+  universe:{i:'✨',t:'THE UNIVERSE',s:'13.8 BILLION YEARS OF EXISTENCE',b:`
+    <div class="pf"><strong>THE BIG BANG</strong>Universe began 13.8 billion years ago from an infinitely hot, dense point. In the first second it expanded faster than light. In 3 minutes, hydrogen and helium formed. First stars appeared ~200 million years later. The "echo" of the Big Bang — cosmic microwave background — is detectable today.</div>
+    <div class="pf"><strong>THE SCALE</strong>Observable universe: 93 billion light-years across (contains ~2 trillion galaxies). Milky Way: 100,000 light-years across, 200–400 billion stars. Nearest star: Proxima Centauri, 4.24 light-years = 40 trillion km. At ISS speed it would take 160,000 years to reach.</div>
+    <div class="pf"><strong>DARK MATTER & DARK ENERGY</strong>Only 5% of the universe is ordinary visible matter. 27% is dark matter — invisible but has gravity, holds galaxies together. 68% is dark energy — causes the universe to expand at an accelerating rate. We have no idea what either actually is.</div>
+    <div class="pf"><strong>BLACK HOLES</strong>When massive stars die, they can collapse into singularities where gravity is infinite and light cannot escape. Sagittarius A* at the Milky Way's center is 4 million solar masses. In 2019 and 2022 we photographed two black holes for the first time.</div>
+    <div class="pf"><strong>YOU ARE THE UNIVERSE &#9889;</strong>Every hydrogen atom in your body was formed in the Big Bang. Every heavier atom — carbon, oxygen, iron — was forged in dying stars and expelled in supernovae. The iron in your blood was made in a star that exploded before our Sun was born. We are the universe experiencing itself.</div>`},
+  iss:{i:'🚀',t:'LIFE ON THE ISS',s:'400KM ABOVE YOUR HEAD RIGHT NOW',b:`
+    <div class="pf"><strong>DAILY LIFE</strong>Astronauts sleep in small personal pods (any orientation — no up/down). They get 8.5 hours sleep time but see 16 sunrises per day. All clocks set to GMT. Mornings start with exercise, then science, then admin, then dinner.</div>
+    <div class="pf"><strong>FOOD IN SPACE</strong>Food comes in pouches, cans, and freeze-dried packets — water added via special gun. Salt and pepper are liquid (powder would float into eyes). In 2017, a Pizza Hut pizza was delivered by supply rocket — crew said it was the best food in months.</div>
+    <div class="pf"><strong>EXERCISE IS MANDATORY</strong>Without gravity, muscles and bones waste away fast. Astronauts must exercise 2 hours every day: cycling (with bungee straps), running on treadmill (with bungee harness), and resistance training. Still lose 1–2% bone mass per month on long missions.</div>
+    <div class="pf"><strong>THE SCIENCE</strong>Over 3,000 experiments conducted on the ISS. Key discoveries: new fire behaviour in microgravity, protein crystal growth for drug design, plant growth in space, Earth observation of disasters, and testing technology for Mars missions.</div>
+    <div class="pf"><strong>WEIRD EFFECTS &#9889;</strong>Astronauts grow 2–3 cm taller (spine decompresses) and shrink back on return. Fluid shifts to the head causing permanent vision changes in many. Returning to Earth feels like "wearing a gorilla suit." Tears float as bubbles. Burping is impossible (liquid and gas don't separate in microgravity).</div>`}
+};
+
+/* SOLAR SYSTEM */
+let solScene,solCam,solRen,solAF,solPlanets=[];
 
 function initSolar(){
-  const cv=document.getElementById('c-solar');
+  const cv=document.getElementById('cs');
   solScene=new THREE.Scene();
-  solScene.fog=new THREE.FogExp2(0x000008,.011);
-  solCam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
-  solCam.position.set(0,16,34);
-  solCam.lookAt(0,0,0);
+  solScene.fog=new THREE.FogExp2(0x000008,.009);
+  solCam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,2000);
+  solCam.position.set(0,18,38);solCam.lookAt(0,0,0);
   solRen=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
   solRen.setSize(innerWidth,innerHeight);
   solRen.setPixelRatio(Math.min(devicePixelRatio,2));
-  makeStars(solScene,7000);
 
+  makeStarsField(solScene,10000);
   // Sun
-  solScene.add(new THREE.Mesh(new THREE.SphereGeometry(2.4,32,32),new THREE.MeshBasicMaterial({color:0xffdd44})));
-  solScene.add(new THREE.Mesh(new THREE.SphereGeometry(3.1,32,32),new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:.14,side:THREE.BackSide})));
-  solScene.add(new THREE.PointLight(0xffeeaa,2.2,180));
-  solScene.add(new THREE.AmbientLight(0x112233,.7));
+  solScene.add(new THREE.Mesh(new THREE.SphereGeometry(2.5,32,32),new THREE.MeshBasicMaterial({color:0xffdd33})));
+  solScene.add(new THREE.Mesh(new THREE.SphereGeometry(3.5,32,32),new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:.11,side:THREE.BackSide})));
+  solScene.add(new THREE.Mesh(new THREE.SphereGeometry(4.8,32,32),new THREE.MeshBasicMaterial({color:0xff4400,transparent:true,opacity:.04,side:THREE.BackSide})));
+  solScene.add(new THREE.PointLight(0xffeeaa,2.5,300));
+  solScene.add(new THREE.AmbientLight(0x112233,.6));
 
-  // Planets
-  [{r:.21,d:4.4,c:0xaaaaaa,s:.047},{r:.52,d:6.3,c:0xe8cda0,s:.035},
-   {r:.58,d:8.8,c:0x3a7de8,s:.029,earth:true},{r:.33,d:11.2,c:0xc1440e,s:.024},
-   {r:1.18,d:15.8,c:0xc88b3a,s:.013},{r:.98,d:20.5,c:0xe4d191,s:.009,rings:true},
-   {r:.68,d:25.5,c:0x7de8e8,s:.006},{r:.63,d:29.5,c:0x3f54ba,s:.005}
-  ].forEach((p,i)=>{
-    const om=new THREE.Mesh(new THREE.TorusGeometry(p.d,.013,2,128),new THREE.MeshBasicMaterial({color:0x334466,transparent:true,opacity:.3}));
-    om.rotation.x=Math.PI/2; solScene.add(om);
-    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.r,24,24),new THREE.MeshStandardMaterial({color:p.c,roughness:.8}));
-    if(p.rings){const rm=new THREE.Mesh(new THREE.TorusGeometry(p.r*1.75,p.r*.38,2,64),new THREE.MeshBasicMaterial({color:0xd4b483,transparent:true,opacity:.55,side:THREE.DoubleSide}));rm.rotation.x=1.2;mesh.add(rm);}
-    const a=(i/8)*Math.PI*2;
-    mesh.position.x=Math.cos(a)*p.d; mesh.position.z=Math.sin(a)*p.d;
-    planets.push({mesh,d:p.d,s:p.s,a,earth:!!p.earth});
+  const pd=[
+    {r:.2,d:4.2,c:0xaaaaaa,s:.047,nm:'Mercury'},
+    {r:.5,d:6.2,c:0xe8d5b0,s:.035,nm:'Venus'},
+    {r:.58,d:8.8,c:0x3a7de8,s:.029,nm:'Earth',earth:true,moon:1},
+    {r:.32,d:11.2,c:0xc1440e,s:.024,nm:'Mars',moon:1},
+    {r:1.2,d:15.8,c:0xc88b3a,s:.013,nm:'Jupiter',moon:4},
+    {r:1.0,d:20.8,c:0xe4d191,s:.009,nm:'Saturn',rings:true,moon:2},
+    {r:.7,d:25.8,c:0x7de8e8,s:.006,nm:'Uranus',rings2:true,moon:1},
+    {r:.65,d:30,c:0x3f54ba,s:.005,nm:'Neptune',moon:1},
+  ];
+
+  // Asteroid belt
+  for(let i=0;i<350;i++){
+    const ang=Math.random()*Math.PI*2;
+    const dist=12.8+Math.random()*1.6;
+    const ab=new THREE.Mesh(
+      new THREE.SphereGeometry(.018+Math.random()*.04,4,4),
+      new THREE.MeshBasicMaterial({color:0x776655})
+    );
+    ab.position.set(Math.cos(ang)*dist,(Math.random()-.5)*.35,Math.sin(ang)*dist);
+    ab._a=ang;ab._d=dist;ab._s=.003+Math.random()*.002;ab._ast=true;
+    solPlanets.push(ab);solScene.add(ab);
+  }
+
+  pd.forEach((p,i)=>{
+    const om=new THREE.Mesh(
+      new THREE.TorusGeometry(p.d,.011,2,128),
+      new THREE.MeshBasicMaterial({color:0x334455,transparent:true,opacity:.25})
+    );
+    om.rotation.x=Math.PI/2;solScene.add(om);
+    const mesh=new THREE.Mesh(
+      new THREE.SphereGeometry(p.r,28,28),
+      new THREE.MeshPhongMaterial({color:p.c,shininess:8})
+    );
+    if(p.rings){
+      const rg=new THREE.Mesh(new THREE.TorusGeometry(p.r*1.82,p.r*.44,2,72),new THREE.MeshBasicMaterial({color:0xd4b483,transparent:true,opacity:.52,side:THREE.DoubleSide}));
+      rg.rotation.x=1.2;mesh.add(rg);
+    }
+    if(p.rings2){
+      const rg2=new THREE.Mesh(new THREE.TorusGeometry(p.r*1.65,p.r*.14,2,64),new THREE.MeshBasicMaterial({color:0x88cccc,transparent:true,opacity:.38,side:THREE.DoubleSide}));
+      mesh.add(rg2);
+    }
+    if(p.moon){
+      for(let m=0;m<p.moon;m++){
+        const mm=new THREE.Mesh(new THREE.SphereGeometry(p.r*.18,8,8),new THREE.MeshBasicMaterial({color:0x999999}));
+        mm._im=true;mm._md=p.r*(1.8+m*.9);mm._ma=Math.random()*Math.PI*2;mm._ms=.04+m*.012;
+        mesh.add(mm);
+      }
+    }
+    const ang=(i/8)*Math.PI*2;
+    mesh.position.set(Math.cos(ang)*p.d,0,Math.sin(ang)*p.d);
+    solPlanets.push({mesh,d:p.d,s:p.s,a:ang,earth:!!p.earth});
     solScene.add(mesh);
   });
 
-  // Loading bar
   let pct=0;
-  const msgs=['LOADING SOLAR TEXTURES...','CALCULATING ORBITS...','SYNCING ISS DATA...','ALMOST READY...','CLICK ENTER MISSION'];
+  const msgs=['LOADING SOLAR TEXTURES...','CALCULATING ORBITS...','PLOTTING ISS PATH...','SYNCING LIVE DATA...','READY — CLICK ENTER MISSION'];
   const ti=setInterval(()=>{
-    pct+=3; if(pct>=100){pct=100;clearInterval(ti);}
-    document.getElementById('lbar-fill').style.width=pct+'%';
-    document.getElementById('lbar-txt').textContent=msgs[Math.min(Math.floor(pct/25),4)];
-  },60);
-
+    pct+=2;if(pct>=100){pct=100;clearInterval(ti);}
+    document.getElementById('lf').style.width=pct+'%';
+    document.getElementById('lt').textContent=msgs[Math.min(Math.floor(pct/25),4)];
+  },50);
   animSolar();
-  window.addEventListener('resize',()=>{solCam.aspect=innerWidth/innerHeight;solCam.updateProjectionMatrix();solRen.setSize(innerWidth,innerHeight);});
+  window.addEventListener('resize',onResize);
 }
 
+let solStars=null;
 function animSolar(){
   solAF=requestAnimationFrame(animSolar);
   const t=Date.now()*.001;
-  planets.forEach(p=>{p.a+=p.s*.5;p.mesh.position.x=Math.cos(p.a)*p.d;p.mesh.position.z=Math.sin(p.a)*p.d;p.mesh.rotation.y+=.005;});
-  solCam.position.x=Math.sin(t*.045)*37; solCam.position.z=Math.cos(t*.045)*37; solCam.position.y=13+Math.sin(t*.03)*4;
+  solPlanets.forEach(p=>{
+    if(p._ast){p._a+=p._s;p.position.x=Math.cos(p._a)*p._d;p.position.z=Math.sin(p._a)*p._d;return;}
+    p.a+=p.s*.45;
+    p.mesh.position.x=Math.cos(p.a)*p.d;
+    p.mesh.position.z=Math.sin(p.a)*p.d;
+    p.mesh.rotation.y+=.006;
+    p.mesh.children.forEach(c=>{if(c._im){c._ma+=c._ms;c.position.x=Math.cos(c._ma)*c._md;c.position.z=Math.sin(c._ma)*c._md;}});
+  });
+  solCam.position.x=Math.sin(t*.04)*42;
+  solCam.position.z=Math.cos(t*.04)*42;
+  solCam.position.y=16+Math.sin(t*.025)*5;
   solCam.lookAt(0,0,0);
+  if(solStars)solStars.rotation.y+=.00006;
   solRen.render(solScene,solCam);
 }
 
 function enterDash(){
-  const ep=planets.find(p=>p.earth);
+  const ep=solPlanets.find(p=>p&&p.earth);
   gsap.timeline()
-    .to(solCam.position,{duration:2,x:ep.mesh.position.x,y:ep.mesh.position.y+1.5,z:ep.mesh.position.z+3,ease:'power2.inOut',onUpdate:()=>solCam.lookAt(ep.mesh.position)})
-    .to('#s-intro',{duration:.7,opacity:0,ease:'power2.in'},'-=.2')
+    .to(solCam.position,{duration:2.2,x:ep.mesh.position.x,y:ep.mesh.position.y+1.8,z:ep.mesh.position.z+3.5,ease:'power2.inOut',onUpdate:()=>solCam.lookAt(ep.mesh.position)})
+    .to('#si',{duration:.7,opacity:0,ease:'power2.in'},'-=.3')
     .call(()=>{
       cancelAnimationFrame(solAF);
-      document.getElementById('s-intro').style.display='none';
-      const d=document.getElementById('s-dash');
-      d.style.display='block';
+      document.getElementById('si').style.display='none';
+      const d=document.getElementById('sd');d.style.display='block';
       requestAnimationFrame(()=>d.classList.add('on'));
       initEarth();
     });
 }
 
-/* ── EARTH DASHBOARD ─────────────────────── */
-let eScene,eCam,eRen,eAF,earthMesh,issMarker,trailLine;
-let isDrag=false,pX=0,pY=0,rotY=0,rotX=0,issLat=0,issLon=0;
+/* EARTH SCENE */
+let eScene,eCam,eRen,eAF,earthGroup,cloudMesh,issMarker,trailLine,moonObj,sunObj;
+let isDrag=false,pX=0,pY=0,rotY=0,rotX=0,showTrail=true,zoom=3.8;
+let issLat=0,issLon=0,satMeshes=[],earthStars=null;
 
 function initEarth(){
-  const cv=document.getElementById('c-earth');
+  const cv=document.getElementById('ce');
   eScene=new THREE.Scene();
-  eCam=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,1000);
-  eCam.position.set(0,0,3.8);
+  eCam=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,2000);
+  eCam.position.set(0,0,zoom);
   eRen=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
   eRen.setSize(innerWidth,innerHeight);
   eRen.setPixelRatio(Math.min(devicePixelRatio,2));
-  makeStars(eScene,3000);
 
-  const sunL=new THREE.DirectionalLight(0xfff5e0,1.8); sunL.position.set(5,3,5); eScene.add(sunL);
-  eScene.add(new THREE.AmbientLight(0x112244,.6));
+  earthStars=makeStarsField(eScene,7000);
 
-  earthMesh=new THREE.Mesh(new THREE.SphereGeometry(1,64,64),new THREE.MeshPhongMaterial({color:0x1a5fa8,emissive:0x001133,specular:0x4488ff,shininess:28}));
-  eScene.add(earthMesh);
+  // Lighting
+  const sl=new THREE.DirectionalLight(0xfff8e8,2.0);sl.position.set(8,3,5);eScene.add(sl);
+  eScene.add(new THREE.AmbientLight(0x0a1a3a,.75));
 
-  // Land patches
-  const lc=[0x2d6a4f,0x40916c,0x52b788,0x1b4332];
-  for(let i=0;i<120;i++){
-    const phi=Math.random()*Math.PI,theta=Math.random()*Math.PI*2,r=1.002;
-    const dot=new THREE.Mesh(new THREE.SphereGeometry(.018+Math.random()*.025,6,6),new THREE.MeshBasicMaterial({color:lc[Math.floor(Math.random()*4)]}));
-    dot.position.set(r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
-    earthMesh.add(dot);
-  }
+  // Earth group
+  earthGroup=new THREE.Group();eScene.add(earthGroup);
 
-  eScene.add(new THREE.Mesh(new THREE.SphereGeometry(1.06,32,32),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:.11,side:THREE.BackSide})));
-  eScene.add(new THREE.Mesh(new THREE.SphereGeometry(1.002,36,18),new THREE.MeshBasicMaterial({color:0x224466,wireframe:true,transparent:true,opacity:.07})));
+  // Real-looking Earth texture via canvas
+  const etex=buildEarthTex();
+  earthGroup.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1,64,64),
+    new THREE.MeshPhongMaterial({map:etex,specular:new THREE.Color(0x224466),shininess:14,emissive:new THREE.Color(0x001122),emissiveIntensity:.35})
+  ));
 
-  issMarker=new THREE.Mesh(new THREE.ConeGeometry(.024,.075,8),new THREE.MeshBasicMaterial({color:0x00ffff}));
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(.042,.005,8,32),new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.7}));
-  issMarker.add(ring); eScene.add(issMarker);
+  // Cloud layer
+  cloudMesh=new THREE.Mesh(
+    new THREE.SphereGeometry(1.013,48,48),
+    new THREE.MeshPhongMaterial({map:buildCloudTex(),transparent:true,opacity:.5,depthWrite:false})
+  );
+  earthGroup.add(cloudMesh);
 
-  trailLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x00d4ff,transparent:true,opacity:.45}));
+  // Atmosphere glow
+  earthGroup.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1.09,32,32),
+    new THREE.MeshPhongMaterial({color:0x3399ff,transparent:true,opacity:.08,side:THREE.BackSide})
+  ));
+  // Lat/Lon grid
+  earthGroup.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1.003,36,18),
+    new THREE.MeshBasicMaterial({color:0x1a3355,wireframe:true,transparent:true,opacity:.055})
+  ));
+
+  // ISS marker
+  issMarker=new THREE.Mesh(new THREE.ConeGeometry(.028,.08,8),new THREE.MeshBasicMaterial({color:0x00ffff}));
+  issMarker.add(new THREE.Mesh(new THREE.TorusGeometry(.05,.006,8,32),new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.6})));
+  eScene.add(issMarker);
+
+  // Trail
+  trailLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x00d4ff,transparent:true,opacity:.38}));
   eScene.add(trailLine);
 
+  // Decorative satellites
+  const sc=[0xffc857,0x2ed573,0xff4757,0xa29bfe,0xfd79a8,0x74b9ff];
+  const sn=['HST','GPS-III','Sentinel','Tiangong','JWST','GOES-18'];
+  for(let i=0;i<6;i++){
+    const sg=new THREE.Group();
+    sg.add(new THREE.Mesh(new THREE.BoxGeometry(.013,.013,.038),new THREE.MeshBasicMaterial({color:sc[i]})));
+    const sw=new THREE.Mesh(new THREE.BoxGeometry(.055,.003,.016),new THREE.MeshBasicMaterial({color:new THREE.Color(sc[i]).multiplyScalar(.55)}));
+    sg.add(sw);
+    sg._sa=(i/6)*Math.PI*2;sg._si=(i%3)*.38-.19;sg._sd=1.16+i*.055;sg._ss=.014-i*.0008;sg._sn=sn[i];
+    satMeshes.push(sg);eScene.add(sg);
+  }
+
+  // Moon
+  moonObj=new THREE.Mesh(
+    new THREE.SphereGeometry(.27,24,24),
+    new THREE.MeshPhongMaterial({color:0x888888,emissive:0x111111,shininess:4})
+  );
+  moonObj.position.set(5,0.4,0);eScene.add(moonObj);
+
+  // Sun (far)
+  sunObj=new THREE.Group();
+  sunObj.add(new THREE.Mesh(new THREE.SphereGeometry(1.6,24,24),new THREE.MeshBasicMaterial({color:0xffdd33})));
+  const sg2=new THREE.Mesh(new THREE.SphereGeometry(2.3,24,24),new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:.1,side:THREE.BackSide}));
+  sunObj.add(sg2);
+  sunObj.position.set(20,5,-10);eScene.add(sunObj);
+
+  // Events
   cv.addEventListener('mousedown',e=>{isDrag=true;pX=e.clientX;pY=e.clientY;});
   cv.addEventListener('mouseup',()=>isDrag=false);
   cv.addEventListener('mouseleave',()=>isDrag=false);
   cv.addEventListener('mousemove',onMove);
+  cv.addEventListener('wheel',e=>{zoom+=e.deltaY*.003;zoom=Math.max(1.5,Math.min(9,zoom));gsap.to(eCam.position,{duration:.4,z:zoom,ease:'power2.out'});},{passive:true});
+  cv.addEventListener('touchstart',e=>{isDrag=true;pX=e.touches[0].clientX;pY=e.touches[0].clientY;},{passive:true});
+  cv.addEventListener('touchend',()=>isDrag=false);
+  cv.addEventListener('touchmove',e=>{const dx=e.touches[0].clientX-pX,dy=e.touches[0].clientY-pY;rotY+=dx*.005;rotX+=dy*.005;rotX=Math.max(-1.4,Math.min(1.4,rotX));pX=e.touches[0].clientX;pY=e.touches[0].clientY;},{passive:true});
 
   animEarth();
-  fetchISS(); fetchAPOD(); fetchCrew(); startClock();
-  setInterval(fetchISS,ISS_INTERVAL);
-  window.addEventListener('resize',()=>{eCam.aspect=innerWidth/innerHeight;eCam.updateProjectionMatrix();eRen.setSize(innerWidth,innerHeight);});
+  fetchISS();fetchAPOD();fetchCrew();startClock();
+  setInterval(fetchISS,ISS_INT);
+}
+
+function buildEarthTex(){
+  const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  // Ocean
+  const og=x.createLinearGradient(0,0,0,H);
+  og.addColorStop(0,'#08306b');og.addColorStop(.3,'#1565c0');og.addColorStop(.7,'#1a5fa8');og.addColorStop(1,'#0d47a1');
+  x.fillStyle=og;x.fillRect(0,0,W,H);
+  // Ocean texture
+  x.globalAlpha=.08;
+  for(let i=0;i<200;i++){
+    const cx=Math.random()*W,cy=Math.random()*H,r=2+Math.random()*15;
+    const g=x.createRadialGradient(cx,cy,0,cx,cy,r);
+    g.addColorStop(0,'rgba(100,180,255,.6)');g.addColorStop(1,'transparent');
+    x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.fill();
+  }
+  x.globalAlpha=1;
+  // Land — draw continents as filled paths
+  x.fillStyle='#2d6a4f';
+  // North America
+  x.beginPath();x.moveTo(155,140);x.lineTo(210,120);x.lineTo(270,130);x.lineTo(290,170);x.lineTo(280,220);x.lineTo(255,260);x.lineTo(225,280);x.lineTo(195,270);x.lineTo(170,240);x.lineTo(145,190);x.closePath();x.fill();
+  // Central America
+  x.beginPath();x.ellipse(230,295,20,35,.1,0,Math.PI*2);x.fill();
+  // South America
+  x.fillStyle='#33704f';
+  x.beginPath();x.moveTo(228,315);x.lineTo(260,310);x.lineTo(275,340);x.lineTo(270,390);x.lineTo(255,430);x.lineTo(235,445);x.lineTo(215,420);x.lineTo(200,380);x.lineTo(205,345);x.closePath();x.fill();
+  // Europe
+  x.fillStyle='#40916c';
+  x.beginPath();x.ellipse(480,145,42,38,-.1,0,Math.PI*2);x.fill();
+  x.beginPath();x.ellipse(495,170,25,22,-.05,0,Math.PI*2);x.fill();
+  // Scandinavia
+  x.beginPath();x.ellipse(490,115,18,32,-.15,0,Math.PI*2);x.fill();
+  // UK
+  x.beginPath();x.ellipse(452,140,12,20,-.2,0,Math.PI*2);x.fill();
+  // Africa
+  x.fillStyle='#2e7d4f';
+  x.beginPath();x.moveTo(465,200);x.lineTo(520,195);x.lineTo(545,220);x.lineTo(550,270);x.lineTo(540,330);x.lineTo(520,380);x.lineTo(495,400);x.lineTo(470,380);x.lineTo(455,330);x.lineTo(450,270);x.lineTo(455,220);x.closePath();x.fill();
+  // Madagascar
+  x.beginPath();x.ellipse(555,340,8,20,.1,0,Math.PI*2);x.fill();
+  // Middle East
+  x.fillStyle='#c8a85a';
+  x.beginPath();x.ellipse(560,195,38,28,.1,0,Math.PI*2);x.fill();
+  // Asia (main)
+  x.fillStyle='#388e3c';
+  x.beginPath();x.moveTo(560,130);x.lineTo(680,110);x.lineTo(780,120);x.lineTo(850,140);x.lineTo(870,170);x.lineTo(830,200);x.lineTo(750,210);x.lineTo(680,200);x.lineTo(620,185);x.lineTo(580,170);x.closePath();x.fill();
+  // Russia/Siberia
+  x.fillStyle='#2e7d32';
+  x.beginPath();x.moveTo(540,90);x.lineTo(700,70);x.lineTo(900,85);x.lineTo(950,110);x.lineTo(900,130);x.lineTo(750,120);x.lineTo(600,125);x.lineTo(550,115);x.closePath();x.fill();
+  // India
+  x.fillStyle='#2d6a4f';
+  x.beginPath();x.moveTo(640,200);x.lineTo(672,195);x.lineTo(680,230);x.lineTo(665,270);x.lineTo(648,280);x.lineTo(630,270);x.lineTo(622,240);x.closePath();x.fill();
+  // SE Asia
+  x.beginPath();x.ellipse(760,235,35,30,.15,0,Math.PI*2);x.fill();
+  // China / Korea
+  x.fillStyle='#33691e';
+  x.beginPath();x.ellipse(780,165,60,45,.05,0,Math.PI*2);x.fill();
+  // Japan
+  x.fillStyle='#2d6a4f';
+  x.beginPath();x.ellipse(845,160,10,30,-.2,0,Math.PI*2);x.fill();
+  // Australia
+  x.fillStyle='#7b8c3a';
+  x.beginPath();x.moveTo(750,320);x.lineTo(830,310);x.lineTo(870,330);x.lineTo(880,365);x.lineTo(850,400);x.lineTo(790,415);x.lineTo(740,400);x.lineTo(720,370);x.lineTo(730,340);x.closePath();x.fill();
+  // New Zealand
+  x.fillStyle='#4a7c3f';
+  x.beginPath();x.ellipse(900,380,8,22,-.2,0,Math.PI*2);x.fill();
+  // Greenland
+  x.fillStyle='#e8f5e9';
+  x.beginPath();x.ellipse(310,90,30,38,0,0,Math.PI*2);x.fill();
+  // Antarctica
+  x.fillStyle='#e1f5fe';x.fillRect(0,458,W,54);
+  // Arctic ice
+  x.fillStyle='rgba(225,245,254,.7)';x.fillRect(0,0,W,12);
+  // Atmosphere haze
+  const hg=x.createLinearGradient(0,0,0,H);
+  hg.addColorStop(0,'rgba(100,150,255,.06)');hg.addColorStop(.5,'transparent');hg.addColorStop(1,'rgba(50,100,200,.06)');
+  x.fillStyle=hg;x.fillRect(0,0,W,H);
+  return new THREE.CanvasTexture(c);
+}
+
+function buildCloudTex(){
+  const W=512,H=256,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  for(let i=0;i<250;i++){
+    const cx=Math.random()*W,cy=Math.random()*H,r=4+Math.random()*28;
+    const g=x.createRadialGradient(cx,cy,0,cx,cy,r);
+    g.addColorStop(0,'rgba(255,255,255,.62)');g.addColorStop(.5,'rgba(255,255,255,.28)');g.addColorStop(1,'transparent');
+    x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.fill();
+  }
+  return new THREE.CanvasTexture(c);
 }
 
 function onMove(e){
-  if(isDrag){rotY+=(e.clientX-pX)*.005;rotX+=(e.clientY-pY)*.005;rotX=Math.max(-1.2,Math.min(1.2,rotX));pX=e.clientX;pY=e.clientY;return;}
-  if(!issMarker)return;
-  const sp=issMarker.position.clone().project(eCam);
-  const sx=(sp.x+1)/2*innerWidth,sy=(-sp.y+1)/2*innerHeight;
-  const tip=document.getElementById('tip');
-  if(Math.hypot(e.clientX-sx,e.clientY-sy)<45){document.getElementById('tip-coords').textContent='LAT '+issLat.toFixed(2)+'°  LON '+issLon.toFixed(2)+'°';tip.classList.add('on');}
-  else tip.classList.remove('on');
+  if(isDrag){rotY+=(e.clientX-pX)*.005;rotX+=(e.clientY-pY)*.005;rotX=Math.max(-1.4,Math.min(1.4,rotX));pX=e.clientX;pY=e.clientY;return;}
+  const tip=document.getElementById('tp');
+  // ISS
+  if(issMarker){
+    const sp=issMarker.position.clone().project(eCam);
+    const sx=(sp.x+1)/2*innerWidth,sy=(-sp.y+1)/2*innerHeight;
+    if(Math.hypot(e.clientX-sx,e.clientY-sy)<50){
+      document.getElementById('ttt').textContent='ISS — INTERNATIONAL SPACE STATION';
+      document.getElementById('ttb').textContent='LAT '+issLat.toFixed(2)+'°  LON '+issLon.toFixed(2)+'°  ALT '+document.getElementById('va').textContent;
+      tip.classList.add('on');return;
+    }
+  }
+  // Satellites
+  let found=false;
+  satMeshes.forEach(s=>{
+    const sp=s.position.clone().project(eCam);
+    const sx=(sp.x+1)/2*innerWidth,sy=(-sp.y+1)/2*innerHeight;
+    if(Math.hypot(e.clientX-sx,e.clientY-sy)<28){
+      document.getElementById('ttt').textContent=s._sn||'SATELLITE';
+      document.getElementById('ttb').textContent='Active satellite in Earth orbit';
+      tip.classList.add('on');found=true;
+    }
+  });
+  if(!found)tip.classList.remove('on');
 }
 
 function animEarth(){
   eAF=requestAnimationFrame(animEarth);
   const t=Date.now()*.001;
-  if(!isDrag)rotY+=.0014;
-  earthMesh.rotation.y=rotY; earthMesh.rotation.x=rotX;
-  if(issMarker){const pulse=1+.14*Math.sin(t*4);issMarker.scale.set(pulse,pulse,pulse);issMarker.rotation.y=rotY;issMarker.rotation.x=rotX;}
+  if(!isDrag)rotY+=.0012;
+  earthGroup.rotation.y=rotY;earthGroup.rotation.x=rotX;
+  if(cloudMesh)cloudMesh.rotation.y+=.00025;
+  if(issMarker){const p=1+.16*Math.sin(t*4);issMarker.scale.set(p,p,p);}
+  moonObj.position.x=Math.cos(t*.14)*5.5;moonObj.position.z=Math.sin(t*.14)*5.5;moonObj.rotation.y+=.002;
+  satMeshes.forEach((s,i)=>{
+    s._sa+=s._ss;
+    s.position.x=Math.cos(s._sa)*s._sd*Math.cos(s._si);
+    s.position.y=Math.sin(s._si)*s._sd+Math.sin(t*.4+i)*.018;
+    s.position.z=Math.sin(s._sa)*s._sd*Math.cos(s._si);
+    s.rotation.y+=.009;
+  });
+  if(earthStars)earthStars.rotation.y+=.000045;
   eRen.render(eScene,eCam);
 }
 
@@ -348,123 +680,146 @@ function ll2v(lat,lon,r=1.02){
   return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
 }
 
-function placeISS(lat,lon){if(!issMarker)return;const p=ll2v(lat,lon,1.08);issMarker.position.copy(p);issMarker.lookAt(p.clone().multiplyScalar(2));}
-function buildTrail(pts){if(pts.length<2)return;const arr=[];pts.forEach(p=>{const v=ll2v(parseFloat(p.latitude),parseFloat(p.longitude),1.05);arr.push(v.x,v.y,v.z);});trailLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));trailLine.geometry.computeBoundingSphere();}
-function flyISS(){const t=ll2v(issLat,issLon,3.2);gsap.to(eCam.position,{duration:1.8,x:t.x,y:t.y,z:t.z,ease:'power2.inOut',onUpdate:()=>eCam.lookAt(0,0,0)});}
-function resetCam(){gsap.to(eCam.position,{duration:1.5,x:0,y:0,z:3.8,ease:'power2.inOut',onUpdate:()=>eCam.lookAt(0,0,0)});}
-
-/* ── API CALLS ───────────────────────────── */
-async function fetchISS(){
-  try{
-    const r=await fetch(API+'/iss/location/');
-    const j=await r.json();
-    if(!j.success)throw new Error(j.error);
-    const d=j.data;
-    issLat=parseFloat(d.latitude); issLon=parseFloat(d.longitude);
-    placeISS(issLat,issLon);
-    document.getElementById('v-lat').textContent=issLat.toFixed(4)+'°';
-    document.getElementById('v-lon').textContent=issLon.toFixed(4)+'°';
-    document.getElementById('v-alt').textContent=parseFloat(d.altitude).toFixed(1)+' km';
-    document.getElementById('v-vel').textContent=parseFloat(d.velocity).toFixed(2)+' km/s';
-    document.getElementById('v-vis').textContent=(d.visibility||'—').toUpperCase();
-    const s=document.getElementById('v-sta');
-    s.textContent=j.source==='live'?'LIVE ●':'CACHED';
-    s.className='dv '+(j.source==='live'?'ok':'');
-    document.getElementById('last-upd').textContent='Last update: '+new Date().toLocaleTimeString();
-    fetchTrail();
-  }catch(e){
-    document.getElementById('v-sta').textContent='DIRECT FEED';
-    document.getElementById('v-sta').className='dv ok';
-    fetchISSFallback();
-  }
+function placeISS(lat,lon){
+  if(!issMarker)return;
+  const p=ll2v(lat,lon,1.1);
+  issMarker.position.copy(p);
+  issMarker.lookAt(p.clone().multiplyScalar(2));
 }
 
-async function fetchISSFallback(){
-  try{
-    const r=await fetch('https://api.wheretheiss.at/v1/satellites/25544');
-    const d=await r.json();
-    issLat=d.latitude; issLon=d.longitude;
-    placeISS(issLat,issLon);
-    document.getElementById('v-lat').textContent=issLat.toFixed(4)+'°';
-    document.getElementById('v-lon').textContent=issLon.toFixed(4)+'°';
-    document.getElementById('v-alt').textContent=d.altitude.toFixed(1)+' km';
-    document.getElementById('v-vel').textContent=(d.velocity/3600).toFixed(2)+' km/s';
-    document.getElementById('v-vis').textContent=(d.visibility||'—').toUpperCase();
-  }catch(e){console.error('Fallback ISS failed:',e);}
+function buildTrail(pts){
+  if(!showTrail||pts.length<2){trailLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute([],3));return;}
+  const arr=[];pts.forEach(p=>{const v=ll2v(parseFloat(p.latitude),parseFloat(p.longitude),1.05);arr.push(v.x,v.y,v.z);});
+  trailLine.geometry.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));
+  trailLine.geometry.computeBoundingSphere();
 }
 
-async function fetchTrail(){
-  try{const r=await fetch(API+'/iss/history/?limit=50');const j=await r.json();if(j.success&&j.data.length>1)buildTrail(j.data);}catch(e){}
+function toggleTrail(){showTrail=!showTrail;buildTrail([]);}
+function flyISS(){const t=ll2v(issLat,issLon,3.4);gsap.to(eCam.position,{duration:1.8,x:t.x,y:t.y,z:t.z,ease:'power2.inOut',onUpdate:()=>eCam.lookAt(0,0,0)});}
+function resetCam(){zoom=3.8;gsap.to(eCam.position,{duration:1.5,x:0,y:0,z:3.8,ease:'power2.inOut',onUpdate:()=>eCam.lookAt(0,0,0)});rotX=0;}
+function backToSolar(){
+  cancelAnimationFrame(eAF);
+  document.getElementById('sd').style.display='none';document.getElementById('sd').classList.remove('on');
+  document.getElementById('si').style.display='block';document.getElementById('si').style.opacity='1';
+  solPlanets=[];satMeshes=[];initSolar();
+}
+function onResize(){
+  const a=innerWidth/innerHeight;
+  solCam.aspect=eCam.aspect=a;solCam.updateProjectionMatrix();eCam.updateProjectionMatrix();
+  solRen.setSize(innerWidth,innerHeight);eRen.setSize(innerWidth,innerHeight);
 }
 
-async function fetchAPOD(){
-  const load=document.getElementById('apod-load');
-  try{
-    const r=await fetch(API+'/apod/');
-    const j=await r.json();
-    load.style.display='none';
-    if(!j.success)throw new Error(j.error);
-    const d=j.data;
-    if(d.media_type==='image'){const img=document.getElementById('apod-img');img.src=d.url;img.style.display='block';}
-    document.getElementById('apod-title').textContent=d.title;
-    document.getElementById('apod-date').textContent='📅 '+d.date;
-    document.getElementById('apod-exp').textContent=d.explanation.length>380?d.explanation.slice(0,380)+'...':d.explanation;
-    document.getElementById('apod-copy').textContent=d.copyright?'© '+d.copyright:'';
-  }catch(e){load.textContent='NASA APOD UNAVAILABLE';console.error('APOD:',e);}
-}
-
-async function fetchCrew(){
-  const load=document.getElementById('crew-load'),list=document.getElementById('crew-list');
-  try{
-    const r=await fetch(API+'/astronauts/');
-    const j=await r.json();
-    load.style.display='none';
-    if(!j.success)throw new Error(j.error);
-    const em=['👨‍🚀','👩‍🚀','🧑‍🚀'];
-    list.innerHTML=j.people.map((p,i)=>`<div class="ci"><div class="cav">${em[i%3]}</div><div><div class="cn">${p.name}</div><div class="cc">${p.craft}</div></div></div>`).join('');
-    document.querySelector('[onclick="showP(\'crew\',this)"]').textContent='CREW ('+j.number+')';
-  }catch(e){load.textContent='CREW DATA UNAVAILABLE';}
-}
-
-async function getPasses(){
-  const lat=parseFloat(document.getElementById('p-lat').value),lon=parseFloat(document.getElementById('p-lon').value);
-  const load=document.getElementById('pass-load'),list=document.getElementById('pass-list');
-  if(isNaN(lat)||isNaN(lon)){list.innerHTML='<p style="color:var(--danger);font-size:.75rem">Enter valid coordinates.</p>';return;}
-  load.style.display='block';list.innerHTML='';
-  try{
-    const r=await fetch(API+'/passes/?lat='+lat+'&lon='+lon);
-    const j=await r.json();
-    load.style.display='none';
-    if(!j.success)throw new Error(j.error);
-    list.innerHTML=j.passes.map((p,i)=>{const dt=new Date(p.rise_time);return '<div class="pi"><div class="pt">PASS '+(i+1)+' — '+dt.toUTCString().slice(0,22)+'</div><div class="pd">&#9201; '+p.duration_minutes+' min visible</div></div>';}).join('');
-  }catch(e){load.style.display='none';list.innerHTML='<p style="color:var(--danger);font-size:.75rem">Could not fetch passes.</p>';}
-}
-
-/* ── UI HELPERS ──────────────────────────── */
-function showP(name,el){
-  document.querySelectorAll('.n-item').forEach(x=>x.classList.remove('act'));
-  el.classList.add('act');
-  document.querySelectorAll('.sp').forEach(x=>x.classList.remove('act'));
-  document.getElementById('sp-'+name).classList.add('act');
-}
-
-function startClock(){
-  const tick=()=>{const n=new Date();document.getElementById('utc').textContent='UTC '+String(n.getUTCHours()).padStart(2,'0')+':'+String(n.getUTCMinutes()).padStart(2,'0')+':'+String(n.getUTCSeconds()).padStart(2,'0');};
-  tick();setInterval(tick,1000);
-}
-
-function makeStars(scene,n){
+/* STARS */
+function makeStarsField(scene,n){
   const pos=new Float32Array(n*3),col=new Float32Array(n*3);
   for(let i=0;i<n;i++){
-    const th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1),r=80+Math.random()*400;
+    const th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1),r=100+Math.random()*800;
     pos[i*3]=r*Math.sin(ph)*Math.cos(th);pos[i*3+1]=r*Math.sin(ph)*Math.sin(th);pos[i*3+2]=r*Math.cos(ph);
-    const w=Math.random();col[i*3]=.8+w*.2;col[i*3+1]=.8+w*.15;col[i*3+2]=1-w*.3;
+    const w=Math.random();col[i*3]=.7+w*.3;col[i*3+1]=.75+w*.2;col[i*3+2]=1-w*.25;
   }
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.BufferAttribute(pos,3));
   g.setAttribute('color',new THREE.BufferAttribute(col,3));
-  scene.add(new THREE.Points(g,new THREE.PointsMaterial({size:.22,vertexColors:true,transparent:true,opacity:.88})));
+  const pts=new THREE.Points(g,new THREE.PointsMaterial({size:.26,vertexColors:true,transparent:true,opacity:.92}));
+  scene.add(pts);
+  if(!solStars)solStars=pts;
+  return pts;
 }
+
+/* API CALLS */
+async function fetchISS(){
+  try{
+    const r=await fetch(API+'/iss/location/');const j=await r.json();
+    if(!j.success)throw new Error();
+    const d=j.data;
+    issLat=parseFloat(d.latitude);issLon=parseFloat(d.longitude);
+    placeISS(issLat,issLon);
+    document.getElementById('vl').textContent=issLat.toFixed(4)+'°';
+    document.getElementById('vn').textContent=issLon.toFixed(4)+'°';
+    document.getElementById('va').textContent=parseFloat(d.altitude).toFixed(1)+' km';
+    document.getElementById('vv').textContent=parseFloat(d.velocity).toFixed(2)+' km/s';
+    document.getElementById('vx').textContent=(d.visibility||'—').toUpperCase();
+    document.getElementById('vs').textContent=j.source==='live'?'LIVE ●':'CACHED';
+    document.getElementById('vs').className='dv '+(j.source==='live'?'ok':'');
+    document.getElementById('lu').textContent='Updated: '+new Date().toLocaleTimeString();
+    fetchTrail();
+  }catch(e){fetchISSFallback();}
+}
+async function fetchISSFallback(){
+  try{
+    const r=await fetch('https://api.wheretheiss.at/v1/satellites/25544');const d=await r.json();
+    issLat=d.latitude;issLon=d.longitude;placeISS(issLat,issLon);
+    document.getElementById('vl').textContent=issLat.toFixed(4)+'°';
+    document.getElementById('vn').textContent=issLon.toFixed(4)+'°';
+    document.getElementById('va').textContent=d.altitude.toFixed(1)+' km';
+    document.getElementById('vv').textContent=(d.velocity/3600).toFixed(2)+' km/s';
+    document.getElementById('vx').textContent=(d.visibility||'—').toUpperCase();
+    document.getElementById('vs').textContent='DIRECT ●';document.getElementById('vs').className='dv ok';
+  }catch(e){}
+}
+async function fetchTrail(){
+  try{const r=await fetch(API+'/iss/history/?limit=80');const j=await r.json();if(j.success&&j.data.length>1)buildTrail(j.data);}catch(e){}
+}
+
+let apodDate=new Date();
+async function fetchAPOD(d){
+  const load=document.getElementById('ald');load.style.display='block';document.getElementById('ai').style.display='none';
+  const ds=d?d.toISOString().split('T')[0]:undefined;
+  try{
+    const r=await fetch(ds?`${API}/apod/?date=${ds}`:`${API}/apod/`);const j=await r.json();
+    load.style.display='none';if(!j.success)throw new Error();
+    const data=j.data;
+    if(data.media_type==='image'){const img=document.getElementById('ai');img.src=data.url;img.setAttribute('data-hd',data.hdurl||data.url);img.style.display='block';}
+    document.getElementById('att').textContent=data.title;
+    document.getElementById('adt').textContent='📅 '+data.date+(data.copyright?' · © '+data.copyright:'');
+    document.getElementById('aex').textContent=data.explanation.length>340?data.explanation.slice(0,340)+'...':data.explanation;
+  }catch(e){load.textContent='NASA APOD UNAVAILABLE';}
+}
+function changeApod(d){
+  apodDate=new Date(apodDate);apodDate.setDate(apodDate.getDate()+d);
+  if(apodDate>new Date())apodDate=new Date();
+  fetchAPOD(apodDate);
+}
+
+async function fetchCrew(){
+  try{
+    const r=await fetch(API+'/astronauts/');const j=await r.json();
+    document.getElementById('cld').style.display='none';if(!j.success)throw new Error();
+    document.getElementById('cnum').textContent=j.number;
+    const em=['👨‍🚀','👩‍🚀','🧑‍🚀'];
+    document.getElementById('clist').innerHTML=j.people.map((p,i)=>`<div class="ci"><div class="ca">${em[i%3]}</div><div><div class="cn">${p.name}</div><div class="cc">${p.craft}</div></div></div>`).join('');
+  }catch(e){document.getElementById('cld').textContent='CREW DATA UNAVAILABLE';}
+}
+
+async function getPasses(){
+  const lat=parseFloat(document.getElementById('plat').value),lon=parseFloat(document.getElementById('plon').value);
+  const ld=document.getElementById('pasld'),li=document.getElementById('paslist');
+  if(isNaN(lat)||isNaN(lon)){li.innerHTML='<p style="color:var(--d);font-size:.7rem">Enter valid coordinates.</p>';return;}
+  ld.style.display='block';li.innerHTML='';
+  try{
+    const r=await fetch(`${API}/passes/?lat=${lat}&lon=${lon}&n=6`);const j=await r.json();
+    ld.style.display='none';if(!j.success)throw new Error();
+    li.innerHTML=j.passes.map((p,i)=>{const dt=new Date(p.rise_time);return `<div class="px"><div class="pxt">PASS ${i+1} · ${dt.toLocaleDateString()} ${dt.toLocaleTimeString()}</div><div class="pxd">&#9201; ${p.duration_minutes} minutes visible · Look up!</div></div>`;}).join('');
+  }catch(e){ld.style.display='none';li.innerHTML='<p style="color:var(--d);font-size:.7rem">Could not fetch passes.</p>';}
+}
+
+/* UI */
+function showP(name,el){
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));el.classList.add('act');
+  document.querySelectorAll('.sp').forEach(x=>x.classList.remove('act'));document.getElementById('sp-'+name).classList.add('act');
+}
+function startClock(){
+  const tick=()=>{const n=new Date();document.getElementById('uc').textContent='UTC '+String(n.getUTCHours()).padStart(2,'0')+':'+String(n.getUTCMinutes()).padStart(2,'0')+':'+String(n.getUTCSeconds()).padStart(2,'0');};
+  tick();setInterval(tick,1000);
+}
+function showInfo(key){
+  const info=INFO[key];if(!info)return;
+  document.getElementById('pi2').textContent=info.i;document.getElementById('pt2').textContent=info.t;
+  document.getElementById('ps2').textContent=info.s;document.getElementById('pb2').innerHTML=info.b;
+  document.getElementById('pp').classList.add('on');
+}
+function closePopup(){document.getElementById('pp').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
 
 window.addEventListener('DOMContentLoaded',initSolar);
 </script>
